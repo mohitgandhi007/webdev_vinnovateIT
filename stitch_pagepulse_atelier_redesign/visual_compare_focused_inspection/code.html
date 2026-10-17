@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-primary-fixed": "#171e01",
+          "on-tertiary-fixed-variant": "#4d463f",
+          "on-secondary-container": "#7a5928",
+          "primary-fixed-dim": "#c2cb9a",
+          "primary-container": "#70794e",
+          "on-primary": "#ffffff",
+          "secondary-container": "#ffd397",
+          "inverse-primary": "#c2cb9a",
+          "background": "#fcf9f2",
+          "on-tertiary-fixed": "#201b15",
+          "on-secondary-fixed": "#291800",
+          "outline-variant": "#c7c7ba",
+          "surface-container-low": "#f6f3ec",
+          "on-surface-variant": "#46483d",
+          "on-primary-fixed-variant": "#424a24",
+          "surface-container": "#f1eee7",
+          "surface-dim": "#dcdad3",
+          "on-surface": "#1c1c18",
+          "secondary-fixed": "#ffddb2",
+          "surface-tint": "#5a623a",
+          "inverse-surface": "#31312c",
+          "error": "#ba1a1a",
+          "on-error-container": "#93000a",
+          "inverse-on-surface": "#f3f0e9",
+          "secondary": "#795827",
+          "primary-fixed": "#dee8b4",
+          "error-container": "#ffdad6",
+          "tertiary": "#625b53",
+          "tertiary-container": "#7c736b",
+          "surface-container-lowest": "#ffffff",
+          "surface-bright": "#fcf9f2",
+          "on-secondary-fixed-variant": "#5e4112",
+          "on-tertiary": "#ffffff",
+          "on-secondary": "#ffffff",
+          "tertiary-fixed-dim": "#cfc5bc",
+          "tertiary-fixed": "#ece0d7",
+          "primary": "#576038",
+          "on-error": "#ffffff",
+          "on-background": "#1c1c18",
+          "surface-container-high": "#ebe8e1",
+          "secondary-fixed-dim": "#eabf85",
+          "surface-variant": "#e5e2db",
+          "on-primary-container": "#fcffe3",
+          "on-tertiary-container": "#fffbff",
+          "surface": "#fcf9f2",
+          "outline": "#77786c",
+          "surface-container-highest": "#e5e2db"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-md": "1rem",
+          "margin-desktop": "4rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "gutter-sm": "1rem",
+          "margin": "3rem",
+          "margin-mobile": "1.25rem",
+          "space-xs": "0.25rem",
+          "gutter": "1.5rem",
+          "space-xl": "3rem",
+          "gutter-lg": "2.5rem"
+        },
+        "fontFamily": {
+          "label-sm": [
+            "IBM Plex Mono"
+          ],
+          "body-lg": [
+            "DM Sans"
+          ],
+          "label-md": [
+            "IBM Plex Mono"
+          ],
+          "body-sm": [
+            "DM Sans"
+          ],
+          "headline-lg": [
+            "Bodoni Moda"
+          ],
+          "headline-sm": [
+            "Bodoni Moda"
+          ],
+          "headline-xl-mobile": [
+            "Bodoni Moda"
+          ],
+          "body-md": [
+            "DM Sans"
+          ],
+          "headline-md": [
+            "Bodoni Moda"
+          ],
+          "headline-lg-mobile": [
+            "Bodoni Moda"
+          ],
+          "telemetry-data": [
+            "IBM Plex Mono"
+          ],
+          "headline-xl": [
+            "Bodoni Moda"
+          ]
+        },
+        "fontSize": {
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.04em",
+              "fontWeight": "500"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "40px",
+            {
+              "lineHeight": "48px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl-mobile": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-md": [
+            "15px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-lg-mobile": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "fontWeight": "400"
+            }
+          ],
+          "telemetry-data": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "56px",
+            {
+              "lineHeight": "64px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface-container-low font-body-md text-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 left-0 right-0 w-full z-40 bg-surface-container-high/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-margin-mobile md:px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="PagePulse Editorial Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Xc6GmPXpexHnuBngH3X3J6dO1kw-hYkSPscp8dbOAaotxsZNJ815XFJT3vTouzV63jtvIu7Nc4nVkCLihQuDqDCScnLkmHZE5OcsMDeh0K91fYYWCharyXD5mykz5KKr-8qNdcXEt66gnwyaczSlVJAmZVa2cwoKLxqbTUGv1InTetWv3xuZcVOq2KvwJLS07HVfAF5ucW20IZkglePKT9C14nApZlG9SBdw7NFxQsPmwBf6ctTZJw0M8"/><span class="font-headline-sm text-headline-sm italic tracking-tight text-on-surface font-normal">pagepulse.</span></div><div class="hidden lg:flex items-center gap-6"><a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" href="#"><span class="material-symbols-outlined text-[16px]">arrow_back</span><span>Back to Monitors</span></a><div class="h-4 w-px bg-outline-variant/40"></div><nav class="flex items-center gap-space-lg"><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" href="#">Overview</a><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" href="#">Monitors</a><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" href="#">History</a><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" href="#">Insights</a></nav></div><div class="flex items-center gap-space-md"><button class="hidden sm:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-on-surface shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-colors" type="button"><span class="font-label-sm text-label-sm">Search</span><kbd class="font-label-sm text-label-sm bg-surface-container px-1 rounded text-on-surface-variant">⌘K</kbd></button><button class="relative p-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary"></span></button><button class="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md" type="button">◐</button><div class="flex items-center gap-space-xs pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp21O53ry4gPGB-OZcu9guWj_8EZpFosyaLW50Ooub493MfHY2Zi0yiwf1GOv5N_HVmDDGwxS4F29sGkB5JHwQc_YzQazk6woycoz3uOxHMfIlXsltmNFOSbsCZSbXJw7AzXlEDnkpZz0v4mDb424awpxVXL_HrAqR9IwYJb5KlwyYoUdcx3C6OxNWuByRDEU3tbcf0SpiJLF7cn17OCy1OUyAR-Nx6G2Dg9i8YAztM2wOMpGgmL0I"/></div></div></div></header><main class="w-full pt-16 bg-surface-container-low min-h-[calc(100vh-4rem)]"><div class="flex flex-col w-full">
+<section class="w-full px-margin-mobile md:px-margin-desktop pt-8 pb-4"><div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-outline-variant/30"><div><h1 class="font-headline-lg text-headline-lg md:font-headline-xl md:text-headline-xl text-on-surface tracking-tight leading-tight">The difference, <span class="italic font-headline-lg md:font-headline-xl text-primary font-normal">made visible.</span></h1><p class="mt-2 font-body-md text-body-md text-on-surface-variant">Compare two captures and inspect semantic pixel and text changes.</p></div><div class="flex flex-wrap items-center gap-3"><div class="bg-surface-container-lowest px-3.5 py-2 rounded shadow-sm flex items-center gap-2 border border-outline-variant/30"><span class="material-symbols-outlined text-[18px] text-primary">public</span><span class="font-body-sm text-body-sm text-on-surface font-medium">atelier-nordic.com/pricing (Pro Tier)</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant ml-1">expand_more</span></div><div class="inline-flex p-1 bg-surface-container rounded gap-1 shadow-inner"><button class="px-3 py-1 text-label-sm font-label-sm bg-surface-container-lowest rounded shadow-sm text-on-surface font-medium" type="button">Side-by-Side</button><button class="px-3 py-1 text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">Overlay</button><button class="px-3 py-1 text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">Text Diff</button></div></div></div></section>
+<section class="w-full px-margin-mobile md:px-margin-desktop py-4"><div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"><div class="flex flex-col bg-surface-container-lowest rounded shadow-sm overflow-hidden border border-outline-variant/30"><div class="bg-surface-container px-4 py-3 flex items-center justify-between border-b border-outline-variant/20"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-outline-variant"></span><span class="font-label-sm text-label-sm font-semibold tracking-wide text-on-surface">14 Oct, 10:30 UTC · Baseline</span></div><span class="font-label-sm text-label-sm text-on-surface-variant">v1.8.4</span></div><div class="p-6 md:p-8 bg-surface-bright flex flex-col items-center justify-center relative"><div class="w-full max-w-sm bg-surface-container-lowest p-6 rounded shadow-sm flex flex-col border border-outline-variant/20"><div class="flex items-baseline justify-between mb-4"><span class="font-label-md text-label-md text-on-surface font-semibold uppercase tracking-wider">Studio Tier</span><span class="font-label-sm text-label-sm bg-surface-container px-2 py-0.5 rounded text-on-surface-variant">Active</span></div><div class="flex items-baseline gap-1 my-2"><span class="font-headline-lg text-headline-lg text-on-surface font-light">₹999</span><span class="font-body-sm text-body-sm text-on-surface-variant">/ month</span></div><span class="font-label-sm text-label-sm text-on-surface-variant mb-6">Billed annually at ₹11,988</span><div class="space-y-2.5 pt-2 border-t border-outline-variant/20"><div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary">check</span><span>Full Scandinavian monographs library</span></div><div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary">check</span><span>Bi-monthly physical print edition</span></div><div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary">check</span><span>Direct curator studio dialogue</span></div></div><div class="mt-6"><button class="w-full py-2 bg-surface-container text-on-surface font-body-sm text-body-sm rounded text-center" type="button">Subscribe Baseline</button></div></div></div></div><div class="flex flex-col bg-surface-container-lowest rounded shadow-sm overflow-hidden border border-secondary/40 ring-1 ring-secondary/20"><div class="bg-surface-container-high px-4 py-3 flex items-center justify-between border-b border-outline-variant/20"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-sm text-label-sm font-semibold tracking-wide text-on-surface">15 Oct, 10:30 UTC · Current</span></div><span class="font-label-sm text-label-sm text-secondary bg-secondary-container/40 px-2 py-0.5 rounded font-semibold">1 Modification</span></div><div class="p-6 md:p-8 bg-surface-bright flex flex-col items-center justify-center relative"><div class="w-full max-w-sm bg-surface-container-lowest p-6 rounded shadow-sm flex flex-col relative border border-outline-variant/20"><div class="flex items-baseline justify-between mb-4"><span class="font-label-md text-label-md text-on-surface font-semibold uppercase tracking-wider">Studio Tier</span><span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-medium">Current</span></div><div class="relative p-3 rounded bg-secondary-container/20 border border-secondary/30"><div class="flex items-baseline gap-2 my-1"><span class="font-headline-lg text-headline-lg text-secondary font-semibold">₹1,199</span><span class="font-body-sm text-body-sm text-on-surface-variant">/ month</span><span class="font-label-sm text-label-sm text-on-surface-variant line-through ml-1">₹999</span></div><span class="font-label-sm text-label-sm text-secondary font-medium block">Billed annually at ₹14,388 (+₹2,400)</span></div><div class="space-y-2.5 pt-4 mt-2 border-t border-outline-variant/20"><div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary">check</span><span>Full Scandinavian monographs library</span></div><div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary">check</span><span>Bi-monthly physical print edition</span></div><div class="flex items-center gap-2 text-on-surface font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px] text-primary">check</span><span>Direct curator studio dialogue</span></div></div><div class="mt-6"><button class="w-full py-2 bg-primary text-on-primary font-body-sm text-body-sm rounded text-center shadow-sm hover:bg-primary-container transition-colors" type="button">Subscribe Updated</button></div></div></div></div></div></section>
+<section class="w-full px-margin-mobile md:px-margin-desktop py-6"><div class="bg-surface-container-lowest p-6 md:p-8 rounded shadow-sm border border-outline-variant/30"><div class="flex flex-col md:flex-row md:items-center justify-between gap-6"><div class="max-w-2xl"><div class="flex items-center gap-2 mb-2"><span class="material-symbols-outlined text-[20px] text-secondary">price_change</span><span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Change Summary</span></div><h2 class="font-headline-md text-headline-md text-on-surface font-medium">Price adjustment detected</h2><p class="mt-3 font-body-md text-body-md text-on-surface-variant leading-relaxed">Atelier Pro subscription increased by ₹200/month (+20%) from ₹999 to ₹1,199. Onboarding assistance was removed from standard tier inclusions. All other terms and layout elements remain unchanged.</p></div><div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0"><button class="px-4 py-2 border border-outline-variant hover:bg-surface-container text-on-surface font-body-sm text-body-sm rounded transition-colors flex items-center justify-center gap-2" type="button"><span class="material-symbols-outlined text-[16px]">file_download</span><span>Export Summary</span></button><button class="px-5 py-2 bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm rounded font-medium shadow-sm transition-colors flex items-center justify-center gap-2" type="button"><span class="material-symbols-outlined text-[16px]">check</span><span>Mark as Reviewed</span></button></div></div></div></section>
+<section class="w-full px-margin-mobile md:px-margin-desktop py-4 pb-16"><div class="bg-surface-container-lowest p-6 rounded shadow-sm border border-outline-variant/20"><div class="flex items-center justify-between mb-3"><span class="font-label-md text-label-md text-on-surface font-semibold uppercase tracking-wider">Recent Capture Chronology</span><span class="font-label-sm text-label-sm text-on-surface-variant">Latest 3 captures</span></div><div class="divide-y divide-outline-variant/20"><div class="py-3 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-telemetry-data text-telemetry-data text-on-surface font-medium">#849</span><span class="font-body-sm text-body-sm text-on-surface">Price increase detected (+₹200)</span></div><div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm"><span>Today, 10:30 UTC</span><span class="bg-secondary-container/40 text-on-secondary-container px-2 py-0.5 rounded font-medium">1 Change</span></div></div><div class="py-3 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full bg-outline-variant"></span><span class="font-telemetry-data text-telemetry-data text-on-surface font-medium">#848</span><span class="font-body-sm text-body-sm text-on-surface">Routine telemetry audit · No deviations</span></div><div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm"><span>Today, 04:30 UTC</span><span class="bg-surface-container px-2 py-0.5 rounded">Clean</span></div></div><div class="py-3 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full bg-outline-variant"></span><span class="font-telemetry-data text-telemetry-data text-on-surface font-medium">#847</span><span class="font-body-sm text-body-sm text-on-surface">Routine telemetry audit · No deviations</span></div><div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm"><span>Yesterday, 22:30 UTC</span><span class="bg-surface-container px-2 py-0.5 rounded">Clean</span></div></div></div></div></section>
+</div></main><footer class="w-full bg-surface-container py-space-xl"><div class="w-full px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm italic text-on-surface">pagepulse.</span><span class="font-label-sm text-label-sm text-on-surface-variant">Atelier Edition v2.4</span></div><div class="flex items-center gap-space-lg"><span class="font-label-sm text-label-sm text-on-surface-variant">© 2025 Digital Atelier Labs. All rights reserved.</span></div></div></footer></body></html>

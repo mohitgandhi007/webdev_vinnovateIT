@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Production Build
+dist/
+build/
+
+# Uploads & Artifacts
+uploads/
+*.log
+scratch/
+test-results/
+
+# Editor & OS
+.DS_Store
+.idea/
+.vscode/

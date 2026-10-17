@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-primary-fixed": "#171e01",
+          "on-tertiary-fixed-variant": "#4d463f",
+          "on-secondary-container": "#7a5928",
+          "primary-fixed-dim": "#c2cb9a",
+          "primary-container": "#70794e",
+          "on-primary": "#ffffff",
+          "secondary-container": "#ffd397",
+          "inverse-primary": "#c2cb9a",
+          "background": "#fcf9f2",
+          "on-tertiary-fixed": "#201b15",
+          "on-secondary-fixed": "#291800",
+          "outline-variant": "#c7c7ba",
+          "surface-container-low": "#f6f3ec",
+          "on-surface-variant": "#46483d",
+          "on-primary-fixed-variant": "#424a24",
+          "surface-container": "#f1eee7",
+          "surface-dim": "#dcdad3",
+          "on-surface": "#1c1c18",
+          "secondary-fixed": "#ffddb2",
+          "surface-tint": "#5a623a",
+          "inverse-surface": "#31312c",
+          "error": "#ba1a1a",
+          "on-error-container": "#93000a",
+          "inverse-on-surface": "#f3f0e9",
+          "secondary": "#795827",
+          "primary-fixed": "#dee8b4",
+          "error-container": "#ffdad6",
+          "tertiary": "#625b53",
+          "tertiary-container": "#7c736b",
+          "surface-container-lowest": "#ffffff",
+          "surface-bright": "#fcf9f2",
+          "on-secondary-fixed-variant": "#5e4112",
+          "on-tertiary": "#ffffff",
+          "on-secondary": "#ffffff",
+          "tertiary-fixed-dim": "#cfc5bc",
+          "tertiary-fixed": "#ece0d7",
+          "primary": "#576038",
+          "on-error": "#ffffff",
+          "on-background": "#1c1c18",
+          "surface-container-high": "#ebe8e1",
+          "secondary-fixed-dim": "#eabf85",
+          "surface-variant": "#e5e2db",
+          "on-primary-container": "#fcffe3",
+          "on-tertiary-container": "#fffbff",
+          "surface": "#fcf9f2",
+          "outline": "#77786c",
+          "surface-container-highest": "#e5e2db"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-md": "1rem",
+          "margin-desktop": "4rem",
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "gutter-sm": "1rem",
+          "margin": "3rem",
+          "margin-mobile": "1.25rem",
+          "space-xs": "0.25rem",
+          "gutter": "1.5rem",
+          "space-xl": "3rem",
+          "gutter-lg": "2.5rem"
+        },
+        "fontFamily": {
+          "label-sm": [
+            "IBM Plex Mono"
+          ],
+          "body-lg": [
+            "DM Sans"
+          ],
+          "label-md": [
+            "IBM Plex Mono"
+          ],
+          "body-sm": [
+            "DM Sans"
+          ],
+          "headline-lg": [
+            "Bodoni Moda"
+          ],
+          "headline-sm": [
+            "Bodoni Moda"
+          ],
+          "headline-xl-mobile": [
+            "Bodoni Moda"
+          ],
+          "body-md": [
+            "DM Sans"
+          ],
+          "headline-md": [
+            "Bodoni Moda"
+          ],
+          "headline-lg-mobile": [
+            "Bodoni Moda"
+          ],
+          "telemetry-data": [
+            "IBM Plex Mono"
+          ],
+          "headline-xl": [
+            "Bodoni Moda"
+          ]
+        },
+        "fontSize": {
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.04em",
+              "fontWeight": "500"
+            }
+          ],
+          "body-sm": [
+            "13px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg": [
+            "40px",
+            {
+              "lineHeight": "48px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl-mobile": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-md": [
+            "15px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-lg-mobile": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "fontWeight": "400"
+            }
+          ],
+          "telemetry-data": [
+            "13px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "56px",
+            {
+              "lineHeight": "64px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface-container-low font-body-md text-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 left-0 right-0 w-full z-40 bg-surface-container-high/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full px-margin-mobile md:px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="flex flex-col max-w-2xl"><h1 class="font-headline-lg text-headline-lg text-on-surface font-normal tracking-tight">The <span class="font-headline-lg text-headline-lg italic text-primary">pages you follow</span>.</h1><p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">Manage your monitored destinations and configure change sensitivity.</p><div class="flex items-center gap-2 mt-2 text-label-sm font-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span><span>18 targets active</span><span class="text-tertiary">·</span><span class="text-secondary font-medium">2 require review</span></div></div><div class="flex items-center gap-space-sm flex-shrink-0"><button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm font-medium transition-all shadow-sm" id="open-drawer-btn" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Add Monitor</span></button></div></div><nav class="hidden lg:flex items-center gap-space-lg" data-active-classes="text-on-surface font-medium border-b-2 border-primary pb-0.5"><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" data-path="overview" href="#">Overview</a><a aria-current="page" class="transition-colors tracking-wide text-on-surface font-medium border-b-2 border-primary pb-0.5" data-path="monitors" href="#">Monitors</a><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" data-path="history" href="#">History</a><a class="text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm tracking-wide" data-path="insights" href="#">Insights</a></nav><div class="flex items-center gap-space-md"><button class="hidden sm:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-lowest text-on-surface-variant hover:text-on-surface shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-colors" type="button"><span class="font-label-sm text-label-sm">Search</span><kbd class="font-label-sm text-label-sm bg-surface-container px-1 rounded text-on-surface-variant">⌘K</kbd></button><button class="relative p-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary"></span></button><button class="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md" type="button">◐</button><div class="flex items-center gap-space-xs pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp21O53ry4gPGB-OZcu9guWj_8EZpFosyaLW50Ooub493MfHY2Zi0yiwf1GOv5N_HVmDDGwxS4F29sGkB5JHwQc_YzQazk6woycoz3uOxHMfIlXsltmNFOSbsCZSbXJw7AzXlEDnkpZz0v4mDb424awpxVXL_HrAqR9IwYJb5KlwyYoUdcx3C6OxNWuByRDEU3tbcf0SpiJLF7cn17OCy1OUyAR-Nx6G2Dg9i8YAztM2wOMpGgmL0I"/></div></div></div></header><main class="w-full pt-16 bg-surface-container-low min-h-[calc(100vh-4rem)]"><div class="flex flex-col w-full">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=IBM+Plex+Mono:ital,wght@0,300..700;1,300..700&family=Italianno&display=swap');
+    .font-italianno { font-family: 'Italianno', cursive; }
+  </style>
+<div class="w-full px-margin-mobile md:px-margin-desktop py-space-lg flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md border-b border-surface-variant pb-space-lg"><div class="flex flex-col max-w-2xl"><h1 class="font-headline-lg text-headline-lg text-on-surface font-normal tracking-tight">The <span class="font-headline-lg text-headline-lg italic text-primary">pages you follow</span>.</h1><p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">Manage your monitored destinations and configure change sensitivity.</p><div class="flex items-center gap-2 mt-2 text-label-sm font-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span><span>18 targets active</span><span class="text-tertiary">·</span><span class="text-secondary font-medium">2 require review</span></div></div><div class="flex items-center gap-space-sm flex-shrink-0"><button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm font-medium transition-all shadow-sm" id="open-drawer-btn" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Add Monitor</span></button></div></div>
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md bg-surface-container-lowest p-3 rounded shadow-sm"><div class="flex-1 max-w-md relative flex items-center"><span class="material-symbols-outlined absolute left-3 text-[18px] text-on-surface-variant">search</span><input class="w-full pl-9 pr-4 py-2 bg-surface-container-low text-on-surface rounded font-body-sm text-body-sm placeholder:italic placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-primary transition-all" id="search-input" placeholder="Filter destinations..." type="text"/></div><div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" id="filter-pills"><button class="filter-tab active px-3.5 py-1.5 rounded font-label-sm text-label-sm bg-primary text-on-primary transition-all" data-filter="all">All (18)</button><button class="filter-tab px-3.5 py-1.5 rounded font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:text-on-surface transition-all" data-filter="changed">Changed (5)</button><button class="filter-tab px-3.5 py-1.5 rounded font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:text-on-surface transition-all" data-filter="attention">Needs Attention (2)</button><button class="filter-tab px-3.5 py-1.5 rounded font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:text-on-surface transition-all" data-filter="healthy">Healthy (11)</button></div></div>
+<div class="w-full bg-surface-container-lowest rounded shadow-sm overflow-hidden">
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse" id="monitors-table">
+<thead>
+<tr class="bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm tracking-widest uppercase"><th class="py-3 px-space-md font-medium" scope="col">Website</th><th class="py-3 px-space-md font-medium" scope="col">Status</th><th class="py-3 px-space-md font-medium" scope="col">Last Checked</th><th class="py-3 px-space-md font-medium" scope="col">Last Change</th><th class="py-3 px-space-md font-medium text-right" scope="col">Actions</th></tr>
+</thead>
+<tbody class="divide-y divide-surface-container" id="monitors-body"><tr class="monitor-row hover:bg-surface-container-low/70 transition-colors group" data-status="changed"><td class="py-4 px-space-md align-middle"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface font-label-sm text-label-sm font-semibold">AN</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-on-surface truncate group-hover:text-primary transition-colors">Atelier Nordic Tiering</span><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary truncate flex items-center gap-1" href="https://atelier-nordic.com/pricing" target="_blank">atelier-nordic.com/pricing <span class="material-symbols-outlined text-[12px]">north_east</span></a></div></div></td><td class="py-4 px-space-md align-middle"><div class="inline-flex items-center gap-1.5 font-label-sm text-label-sm font-medium text-secondary"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Changed</span></div></td><td class="py-4 px-space-md align-middle font-telemetry-data text-telemetry-data text-on-surface-variant">4m ago</td><td class="py-4 px-space-md align-middle font-body-sm text-body-sm text-on-surface">Price shift: €39 → €49 / mo</td><td class="py-4 px-space-md align-middle text-right"><div class="flex items-center justify-end gap-1.5"><button class="inspect-btn px-3 py-1.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm transition-all" data-target="atelier-nordic.com/pricing" type="button">View Diff</button><button class="p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></td></tr><tr class="monitor-row hover:bg-surface-container-low/70 transition-colors group" data-status="healthy"><td class="py-4 px-space-md align-middle"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface font-label-sm text-label-sm font-semibold">LN</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-on-surface truncate group-hover:text-primary transition-colors">Linear App Releases</span><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary truncate flex items-center gap-1" href="https://linear.app/releases" target="_blank">linear.app/releases <span class="material-symbols-outlined text-[12px]">north_east</span></a></div></div></td><td class="py-4 px-space-md align-middle"><div class="inline-flex items-center gap-1.5 font-label-sm text-label-sm font-medium text-primary"><span class="w-2 h-2 rounded-full bg-primary"></span><span>Healthy</span></div></td><td class="py-4 px-space-md align-middle font-telemetry-data text-telemetry-data text-on-surface-variant">11m ago</td><td class="py-4 px-space-md align-middle font-body-sm text-body-sm text-on-surface-variant">v2025.02 Release notes</td><td class="py-4 px-space-md align-middle text-right"><div class="flex items-center justify-end gap-1.5"><button class="inspect-btn px-3 py-1.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm transition-all" data-target="linear.app/releases" type="button">View Diff</button><button class="p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></td></tr><tr class="monitor-row hover:bg-surface-container-low/70 transition-colors group" data-status="attention"><td class="py-4 px-space-md align-middle"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface font-label-sm text-label-sm font-semibold">ML</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-on-surface truncate group-hover:text-primary transition-colors">Minimalissimo Store</span><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary truncate flex items-center gap-1" href="https://minimalissimo.com/shop" target="_blank">minimalissimo.com/shop <span class="material-symbols-outlined text-[12px]">north_east</span></a></div></div></td><td class="py-4 px-space-md align-middle"><div class="inline-flex items-center gap-1.5 font-label-sm text-label-sm font-medium text-error"><span class="w-2 h-2 rounded-full bg-error"></span><span>Needs Attention</span></div></td><td class="py-4 px-space-md align-middle font-telemetry-data text-telemetry-data text-on-surface-variant">1h ago</td><td class="py-4 px-space-md align-middle font-body-sm text-body-sm text-error font-medium">Critical layout shift detected</td><td class="py-4 px-space-md align-middle text-right"><div class="flex items-center justify-end gap-1.5"><button class="inspect-btn px-3 py-1.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm transition-all" data-target="minimalissimo.com/shop" type="button">View Diff</button><button class="p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></td></tr><tr class="monitor-row hover:bg-surface-container-low/70 transition-colors group" data-status="healthy"><td class="py-4 px-space-md align-middle"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface font-label-sm text-label-sm font-semibold">ST</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-on-surface truncate group-hover:text-primary transition-colors">Stripe Documentation Portal</span><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary truncate flex items-center gap-1" href="https://stripe.com/docs" target="_blank">stripe.com/docs <span class="material-symbols-outlined text-[12px]">north_east</span></a></div></div></td><td class="py-4 px-space-md align-middle"><div class="inline-flex items-center gap-1.5 font-label-sm text-label-sm font-medium text-primary"><span class="w-2 h-2 rounded-full bg-primary"></span><span>Healthy</span></div></td><td class="py-4 px-space-md align-middle font-telemetry-data text-telemetry-data text-on-surface-variant">25m ago</td><td class="py-4 px-space-md align-middle font-body-sm text-body-sm text-on-surface-variant">Navigation header layout tweak</td><td class="py-4 px-space-md align-middle text-right"><div class="flex items-center justify-end gap-1.5"><button class="inspect-btn px-3 py-1.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm transition-all" data-target="stripe.com/docs" type="button">View Diff</button><button class="p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></td></tr><tr class="monitor-row hover:bg-surface-container-low/70 transition-colors group" data-status="healthy"><td class="py-4 px-space-md align-middle"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface font-label-sm text-label-sm font-semibold">RC</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-on-surface truncate group-hover:text-primary transition-colors">ReadCV Showcase</span><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary truncate flex items-center gap-1" href="https://readcv.com/explore" target="_blank">readcv.com/explore <span class="material-symbols-outlined text-[12px]">north_east</span></a></div></div></td><td class="py-4 px-space-md align-middle"><div class="inline-flex items-center gap-1.5 font-label-sm text-label-sm font-medium text-primary"><span class="w-2 h-2 rounded-full bg-primary"></span><span>Healthy</span></div></td><td class="py-4 px-space-md align-middle font-telemetry-data text-telemetry-data text-on-surface-variant">2h ago</td><td class="py-4 px-space-md align-middle font-body-sm text-body-sm text-on-surface-variant">New designer roster item indexed</td><td class="py-4 px-space-md align-middle text-right"><div class="flex items-center justify-end gap-1.5"><button class="inspect-btn px-3 py-1.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm transition-all" data-target="readcv.com/explore" type="button">View Diff</button><button class="p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></td></tr><tr class="monitor-row hover:bg-surface-container-low/70 transition-colors group" data-status="healthy"><td class="py-4 px-space-md align-middle"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center flex-shrink-0 text-on-surface font-label-sm text-label-sm font-semibold">RY</div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-medium text-on-surface truncate group-hover:text-primary transition-colors">Raycast Store &amp; Changelog</span><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary truncate flex items-center gap-1" href="https://raycast.com/changelog" target="_blank">raycast.com/changelog <span class="material-symbols-outlined text-[12px]">north_east</span></a></div></div></td><td class="py-4 px-space-md align-middle"><div class="inline-flex items-center gap-1.5 font-label-sm text-label-sm font-medium text-primary"><span class="w-2 h-2 rounded-full bg-primary"></span><span>Healthy</span></div></td><td class="py-4 px-space-md align-middle font-telemetry-data text-telemetry-data text-on-surface-variant">3h ago</td><td class="py-4 px-space-md align-middle font-body-sm text-body-sm text-on-surface-variant">Extension store badge updated</td><td class="py-4 px-space-md align-middle text-right"><div class="flex items-center justify-end gap-1.5"><button class="inspect-btn px-3 py-1.5 rounded bg-surface-container-high hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-label-sm transition-all" data-target="raycast.com/changelog" type="button">View Diff</button><button class="p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Options" type="button"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></td></tr></tbody>
+</table>
+</div>
+<div class="px-space-md py-3 bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant">
+<div class="font-label-sm text-label-sm flex items-center gap-2">
+<span>Displaying 6 of 18 registered destinations</span>
+<span class="text-tertiary">·</span>
+<span class="flex items-center gap-1 text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
+            Sync heartbeat optimal
+          </span>
+</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm">
+<button class="px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface font-medium shadow-xs">1</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container-high text-on-surface-variant">2</button>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container-high text-on-surface-variant">3</button>
+<span class="px-1 text-on-surface-variant">...</span>
+<button class="px-2.5 py-1 rounded hover:bg-surface-container-high text-on-surface-variant flex items-center">
+            Next <span class="material-symbols-outlined text-[14px] ml-0.5">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 bg-inverse-surface/30 backdrop-blur-xs z-50 opacity-0 pointer-events-none transition-opacity duration-300" id="drawer-backdrop"></div>
+<div class="fixed top-0 right-0 h-full w-full sm:w-[480px] bg-surface-container-lowest z-50 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between overflow-y-auto" id="side-drawer"><div class="p-space-lg flex flex-col gap-space-lg"><div class="flex items-center justify-between border-b border-surface-variant pb-space-sm"><div><h2 class="font-headline-sm text-headline-sm text-on-surface">Observe New Target</h2><p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Set up automated change detection</p></div><button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" id="close-drawer-btn" type="button"><span class="material-symbols-outlined text-[20px]">close</span></button></div><div class="flex flex-col gap-space-xs"><label class="font-label-sm text-label-sm font-medium text-on-surface uppercase tracking-wide">Website URL</label><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-3 text-[17px] text-on-surface-variant">link</span><input class="w-full pl-9 pr-3 py-2.5 bg-surface-container-low text-on-surface rounded font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="https://example.com/page" type="url" value="https://minimalissimo.com/shop"/></div></div><div class="flex flex-col gap-space-xs"><label class="font-label-sm text-label-sm font-medium text-on-surface uppercase tracking-wide">What to Monitor</label><div class="space-y-2"><label class="flex items-center gap-3 p-3 rounded bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors"><input checked="" class="w-4 h-4 accent-primary rounded" type="checkbox"/><div class="flex flex-col"><span class="font-body-sm text-body-sm font-medium text-on-surface">Visual Screenshot</span><span class="font-label-sm text-label-sm text-on-surface-variant">Tracks pixel and visual layout changes</span></div></label><label class="flex items-center gap-3 p-3 rounded bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors"><input checked="" class="w-4 h-4 accent-primary rounded" type="checkbox"/><div class="flex flex-col"><span class="font-body-sm text-body-sm font-medium text-on-surface">DOM Text Content</span><span class="font-label-sm text-label-sm text-on-surface-variant">Detects headline, copy, and price alterations</span></div></label></div></div><div class="flex flex-col gap-space-xs"><label class="font-label-sm text-label-sm font-medium text-on-surface uppercase tracking-wide">Check Interval</label><div class="grid grid-cols-4 gap-2"><button class="cadence-chip py-2 px-2 rounded font-label-sm text-label-sm text-center bg-primary text-on-primary" type="button">15m</button><button class="cadence-chip py-2 px-2 rounded font-label-sm text-label-sm text-center bg-surface-container text-on-surface hover:bg-surface-container-high" type="button">1h</button><button class="cadence-chip py-2 px-2 rounded font-label-sm text-label-sm text-center bg-surface-container text-on-surface hover:bg-surface-container-high" type="button">6h</button><button class="cadence-chip py-2 px-2 rounded font-label-sm text-label-sm text-center bg-surface-container text-on-surface hover:bg-surface-container-high" type="button">24h</button></div></div><details class="group pt-1"><summary class="font-label-sm text-label-sm text-primary hover:text-primary-container cursor-pointer select-none font-medium">▾ Advanced settings (optional)</summary><div class="mt-3 p-3 bg-surface-container-low rounded flex flex-col gap-3"><div class="flex flex-col gap-1"><label class="font-label-sm text-label-sm text-on-surface">Custom CSS Selector</label><input class="w-full px-3 py-1.5 bg-surface-container-lowest text-on-surface rounded font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary" placeholder="e.g. main #pricing-grid" type="text"/></div><div class="flex flex-col gap-1.5"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface">Noise Sensitivity Threshold</span><span class="font-label-sm text-label-sm text-primary font-medium">Ignore &lt; 5% shift</span></div><input class="w-full accent-primary cursor-pointer" max="20" min="1" type="range" value="5"/><span class="font-label-sm text-label-sm text-on-surface-variant">Suppresses micro-jitter from font rendering anti-aliasing.</span></div></div></details></div><div class="p-space-lg bg-surface-container flex items-center justify-end gap-space-sm border-t border-surface-variant"><button class="px-4 py-2 rounded text-on-surface font-body-sm text-body-sm hover:bg-surface-container-high transition-colors" id="cancel-drawer-btn" type="button">Cancel</button><button class="px-5 py-2 rounded bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm font-medium shadow-sm transition-all flex items-center gap-1.5" id="save-monitor-btn" type="button"><span>Create Monitor</span></button></div></div>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-inverse-surface/40 backdrop-blur-xs opacity-0 pointer-events-none transition-opacity duration-200" id="diff-modal">
+<div class="bg-surface-container-lowest rounded shadow-2xl w-full max-w-4xl max-h-[921px] flex flex-col overflow-hidden">
+<div class="p-4 bg-surface-container flex items-center justify-between border-b border-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">compare</span>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface" id="modal-target-title">Inspection Diff Analysis</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block font-mono" id="modal-target-url">atelier-nordic.com/pricing</span>
+</div>
+</div>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high" id="close-modal-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-space-md overflow-y-auto flex flex-col gap-space-md">
+<div class="flex items-center justify-between bg-surface-container-low p-3 rounded">
+<div class="flex items-center gap-3">
+<span class="px-2 py-1 rounded bg-secondary-fixed/50 text-secondary font-label-sm text-label-sm font-semibold">Price Delta Flagged</span>
+<span class="font-body-sm text-body-sm text-on-surface">Snapshot baseline compared to 10:24 AM scan</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">42 DOM nodes modified</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>PREVIOUS STATE (Yesterday 10:24 AM)</span>
+<span class="text-error font-medium">- removed</span>
+</div>
+<div class="p-4 rounded bg-error-container/20 font-telemetry-data text-telemetry-data text-on-surface flex flex-col gap-1 border-l-2 border-error">
+<span class="text-on-surface-variant line-through text-error">Studio Subscription: €39 / mo</span>
+<span class="text-on-surface-variant line-through text-error">Included seats: 3 curators</span>
+<span class="text-on-surface-variant line-through text-error">Vector visual history: 30 days</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>CURRENT LIVE REVISION (Today 10:41 AM)</span>
+<span class="text-primary font-medium">+ injected</span>
+</div>
+<div class="p-4 rounded bg-primary-fixed/30 font-telemetry-data text-telemetry-data text-on-surface flex flex-col gap-1 border-l-2 border-primary">
+<span class="font-semibold text-primary">Studio Subscription: €49 / mo (+25.6%)</span>
+<span class="font-semibold text-primary">Included seats: 5 curators (+2 seats)</span>
+<span class="font-semibold text-primary">Vector visual history: 90 days (Extended)</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+              Accept as Baseline
+            </button>
+<button class="px-3 py-1.5 rounded bg-surface-container font-label-sm text-label-sm text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+              Mute Selector Range
+            </button>
+</div>
+<button class="px-4 py-1.5 rounded bg-primary text-on-primary font-body-sm text-body-sm font-medium" id="modal-done-btn" type="button">
+            Done Inspecting
+          </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+    (function initMonitorsCatalog() {
+      const drawer = document.getElementById('side-drawer');
+      const backdrop = document.getElementById('drawer-backdrop');
+      const openDrawerBtn = document.getElementById('open-drawer-btn');
+      const closeDrawerBtn = document.getElementById('close-drawer-btn');
+      const cancelDrawerBtn = document.getElementById('cancel-drawer-btn');
+      const saveMonitorBtn = document.getElementById('save-monitor-btn');
+
+      function openDrawer() {
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+      }
+
+      function closeDrawer() {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        drawer.classList.add('translate-x-full');
+      }
+
+      if (openDrawerBtn) openDrawerBtn.addEventListener('click', openDrawer);
+      if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+      if (cancelDrawerBtn) cancelDrawerBtn.addEventListener('click', closeDrawer);
+      if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+      if (saveMonitorBtn) {
+        saveMonitorBtn.addEventListener('click', () => {
+          closeDrawer();
+        });
+      }
+
+      const cadenceChips = document.querySelectorAll('.cadence-chip');
+      cadenceChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          cadenceChips.forEach(c => {
+            c.classList.remove('bg-primary', 'text-on-primary');
+            c.classList.add('bg-surface-container', 'text-on-surface');
+          });
+          chip.classList.add('bg-primary', 'text-on-primary');
+          chip.classList.remove('bg-surface-container', 'text-on-surface');
+        });
+      });
+
+      const thresholdSlider = document.getElementById('threshold-slider');
+      const sliderValue = document.getElementById('slider-value');
+      if (thresholdSlider && sliderValue) {
+        thresholdSlider.addEventListener('input', (e) => {
+          sliderValue.textContent = `Ignore < ${e.target.value}% shift`;
+        });
+      }
+
+      const filterTabs = document.querySelectorAll('.filter-tab');
+      const rows = document.querySelectorAll('.monitor-row');
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          filterTabs.forEach(t => {
+            t.classList.remove('bg-primary', 'text-on-primary', 'active');
+            t.classList.add('bg-surface-container', 'text-on-surface-variant');
+          });
+          tab.classList.remove('bg-surface-container', 'text-on-surface-variant');
+          tab.classList.add('bg-primary', 'text-on-primary', 'active');
+
+          const filter = tab.getAttribute('data-filter');
+          rows.forEach(row => {
+            if (filter === 'all') {
+              row.style.display = '';
+            } else {
+              const status = row.getAttribute('data-status');
+              row.style.display = (status === filter) ? '' : 'none';
+            }
+          });
+        });
+      });
+
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase().trim();
+          rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+          });
+        });
+      }
+
+      const diffModal = document.getElementById('diff-modal');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const modalDoneBtn = document.getElementById('modal-done-btn');
+      const inspectButtons = document.querySelectorAll('.inspect-btn');
+      const modalTargetTitle = document.getElementById('modal-target-title');
+      const modalTargetUrl = document.getElementById('modal-target-url');
+
+      function showModal(targetUrl) {
+        if (modalTargetUrl) modalTargetUrl.textContent = targetUrl;
+        diffModal.classList.remove('opacity-0', 'pointer-events-none');
+        diffModal.classList.add('opacity-100');
+      }
+
+      function hideModal() {
+        diffModal.classList.remove('opacity-100');
+        diffModal.classList.add('opacity-0', 'pointer-events-none');
+      }
+
+      inspectButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-target') || 'atelier-nordic.com/pricing';
+          showModal(target);
+        });
+      });
+
+      const quickDiffBtn = document.getElementById('quick-diff-btn');
+      if (quickDiffBtn) {
+        quickDiffBtn.addEventListener('click', () => {
+          showModal('atelier-nordic.com/pricing');
+        });
+      }
+
+      if (closeModalBtn) closeModalBtn.addEventListener('click', hideModal);
+      if (modalDoneBtn) modalDoneBtn.addEventListener('click', hideModal);
+      if (diffModal) {
+        diffModal.addEventListener('click', (e) => {
+          if (e.target === diffModal) hideModal();
+        });
+      }
+
+      const densitySpacious = document.getElementById('density-spacious');
+      const densityCompact = document.getElementById('density-compact');
+      if (densitySpacious && densityCompact) {
+        densityCompact.addEventListener('click', () => {
+          densityCompact.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+          densityCompact.classList.remove('text-on-surface-variant');
+          densitySpacious.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+          densitySpacious.classList.add('text-on-surface-variant');
+          
+          rows.forEach(r => {
+            const cells = r.querySelectorAll('td');
+            cells.forEach(c => {
+              c.classList.remove('py-4');
+              c.classList.add('py-2');
+            });
+          });
+        });
+
+        densitySpacious.addEventListener('click', () => {
+          densitySpacious.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+          densitySpacious.classList.remove('text-on-surface-variant');
+          densityCompact.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-xs');
+          densityCompact.classList.add('text-on-surface-variant');
+
+          rows.forEach(r => {
+            const cells = r.querySelectorAll('td');
+            cells.forEach(c => {
+              c.classList.remove('py-2');
+              c.classList.add('py-4');
+            });
+          });
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container py-space-xl"><div class="w-full px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><div class="flex flex-col max-w-2xl"><h1 class="font-headline-lg text-headline-lg text-on-surface font-normal tracking-tight">The <span class="font-headline-lg text-headline-lg italic text-primary">pages you follow</span>.</h1><p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">Manage your monitored destinations and configure change sensitivity.</p><div class="flex items-center gap-2 mt-2 text-label-sm font-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span><span>18 targets active</span><span class="text-tertiary">·</span><span class="text-secondary font-medium">2 require review</span></div></div><div class="flex items-center gap-space-sm flex-shrink-0"><button class="inline-flex items-center gap-2 px-space-md py-2.5 rounded bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm font-medium transition-all shadow-sm" id="open-drawer-btn" type="button"><span class="material-symbols-outlined text-[18px]">add</span><span>Add Monitor</span></button></div></div><div class="flex items-center gap-space-lg"><span class="font-label-sm text-label-sm text-on-surface-variant">© 2025 Digital Atelier Labs. All rights reserved.</span></div></div></footer></body></html>
