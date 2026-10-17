@@ -5,6 +5,7 @@ import { changeService } from '../services/changeService';
 import { snapshotsApi, changesApi } from '../services/apiClient';
 import NumericMetricTracker from '../components/NumericMetricTracker';
 import RssFeedModal from '../components/RssFeedModal';
+import { storage } from '../services/storage';
 
 export default function VisualComparePage() {
   const { id = 'atelier-nordic' } = useParams();
@@ -150,11 +151,25 @@ export default function VisualComparePage() {
           });
           setActiveSnapshotId('current');
         } else {
-          setComparison(null);
+          const demoComp = storage.getDemoComparison(id);
+          if (demoComp) {
+            setComparison(demoComp);
+            setActiveSnapshotId('current');
+          } else {
+            setComparison(null);
+          }
         }
       } catch (err) {
         console.error('[VisualComparePage] Failed to load comparison:', err);
-        if (isMounted) setComparison(null);
+        if (isMounted) {
+          const demoComp = storage.getDemoComparison(id);
+          if (demoComp) {
+            setComparison(demoComp);
+            setActiveSnapshotId('current');
+          } else {
+            setComparison(null);
+          }
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }

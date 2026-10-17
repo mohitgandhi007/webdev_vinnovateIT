@@ -4,9 +4,25 @@
  * abort timeouts, typed error handling, and robust network failure detection.
  */
 
-const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) 
-  ? import.meta.env.VITE_API_BASE_URL 
-  : '/api';
+export function getApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('pagepulse_api_base_url');
+    if (custom) return custom.replace(/\/+$/, '');
+    if (window.PAGEPULSE_API_URL) return window.PAGEPULSE_API_URL.replace(/\/+$/, '');
+  }
+  return (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) 
+    ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '') 
+    : '/api';
+}
+
+export function setCustomApiBaseUrl(url) {
+  if (typeof window === 'undefined') return;
+  if (!url || !url.trim()) {
+    localStorage.removeItem('pagepulse_api_base_url');
+  } else {
+    localStorage.setItem('pagepulse_api_base_url', url.trim().replace(/\/+$/, ''));
+  }
+}
 
 const DEFAULT_TIMEOUT_MS = 12000;
 
@@ -20,6 +36,9 @@ export class ApiError extends Error {
   }
 
   get userMessage() {
+    if (this.code === 'BACKEND_NOT_FOUND' || (this.status === 404 && this.message?.includes('not found'))) {
+      return 'PagePulse API backend is not detected at /api.';
+    }
     if (this.code === 'CONNECTION_REFUSED' || this.status === 0) {
       return 'Cannot reach PagePulse API backend. Ensure the backend server is running.';
     }
@@ -40,7 +59,8 @@ export class ApiError extends Error {
  * Low-level HTTP fetch wrapper with timeout and error extraction
  */
 async function request(endpoint, { method = 'GET', body = null, headers = {}, timeout = DEFAULT_TIMEOUT_MS, params = null } = {}) {
-  let url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const baseUrl = getApiBaseUrl();
+  let url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
   if (params) {
     const query = new URLSearchParams();
@@ -97,9 +117,13 @@ async function request(endpoint, { method = 'GET', body = null, headers = {}, ti
     }
 
     if (!res.ok) {
+      if (res.status === 404 && (typeof data?.text === 'string' && (data.text.includes('could not be found') || data.text.includes('NOT_FOUND') || data.text.includes('<!DOCTYPE')))) {
+        throw new ApiError('PagePulse API backend is not detected on this host at /api.', 404, 'BACKEND_NOT_FOUND');
+      }
       const message = data?.error?.message 
         || data?.message 
         || (data?.error && typeof data.error === 'string' ? data.error : null)
+        || (typeof data?.text === 'string' && data.text.length < 100 && !data.text.includes('<') ? data.text : null)
         || `HTTP ${res.status}: ${res.statusText}`;
       const code = data?.error?.code 
         || (res.status === 400 ? 'VALIDATION_ERROR' : res.status === 404 ? 'NOT_FOUND' : res.status === 429 ? 'RATE_LIMIT_EXCEEDED' : 'HTTP_ERROR');

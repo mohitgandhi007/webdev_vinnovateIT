@@ -1,8 +1,14 @@
 /**
- * Client UI preferences manager (non-sensitive preferences only: theme, layout toggle, filter presets).
- * Authoritative data for monitors, snapshots, and changes is managed exclusively by the backend API.
+ * Client UI storage and Standalone Demonstration Engine.
+ * Manages preferences and provides an in-browser observatory fallback
+ * when running statically (e.g. Vercel, Netlify, or offline).
  */
+import { DEFAULT_STORE } from './mockData.js';
+
 const PREFERENCES_KEY = 'pagepulse_ui_prefs_v1';
+const DEMO_MONITORS_KEY = 'pagepulse_demo_monitors_v2';
+const DEMO_HISTORY_KEY = 'pagepulse_demo_history_v2';
+const DEMO_INSIGHTS_KEY = 'pagepulse_demo_insights_v2';
 
 export const storage = {
   getPreferences(defaults = {}) {
@@ -27,12 +33,75 @@ export const storage = {
     }
   },
 
+  getDemoMonitors() {
+    try {
+      const raw = localStorage.getItem(DEMO_MONITORS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    const initial = DEFAULT_STORE.monitors.map(m => ({
+      ...m,
+      isActive: m.status !== 'paused',
+      feedToken: m.feedToken || 'demo_feed_token_secure_64hex',
+      feedEnabled: true
+    }));
+    this.saveDemoMonitors(initial);
+    return initial;
+  },
+
+  saveDemoMonitors(monitors) {
+    try {
+      localStorage.setItem(DEMO_MONITORS_KEY, JSON.stringify(monitors));
+    } catch {}
+  },
+
+  getDemoHistory() {
+    try {
+      const raw = localStorage.getItem(DEMO_HISTORY_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    const initial = DEFAULT_STORE.history;
+    this.saveDemoHistory(initial);
+    return initial;
+  },
+
+  saveDemoHistory(history) {
+    try {
+      localStorage.setItem(DEMO_HISTORY_KEY, JSON.stringify(history));
+    } catch {}
+  },
+
+  getDemoInsights() {
+    try {
+      const raw = localStorage.getItem(DEMO_INSIGHTS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch {}
+    return DEFAULT_STORE.insights;
+  },
+
+  getDemoComparison(id) {
+    if (DEFAULT_STORE.comparisons[id]) {
+      return DEFAULT_STORE.comparisons[id];
+    }
+    // Return first comparison as fallback
+    const firstKey = Object.keys(DEFAULT_STORE.comparisons)[0];
+    return DEFAULT_STORE.comparisons[firstKey] || null;
+  },
+
   clearPreferences() {
     try {
       localStorage.removeItem(PREFERENCES_KEY);
-      // Clean up legacy prototype key if present
-      localStorage.removeItem('pagepulse_store_v2');
-      localStorage.removeItem('pagepulse_store');
+      localStorage.removeItem(DEMO_MONITORS_KEY);
+      localStorage.removeItem(DEMO_HISTORY_KEY);
+      localStorage.removeItem(DEMO_INSIGHTS_KEY);
     } catch {}
   }
 };

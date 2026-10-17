@@ -51,11 +51,14 @@ export default function TopNavigation() {
         <div className="h-16 w-full px-margin-mobile md:px-margin-desktop flex items-center justify-between">
           {/* Brand Logo & Name */}
           <Link to="/overview" className="flex items-center gap-space-sm group">
-            <img
-              alt="PagePulse Editorial Emblem"
-              className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
-              src="https://lh3.googleusercontent.com/aida/AEtjO1Xc6GmPXpexHnuBngH3X3J6dO1kw-hYkSPscp8dbOAaotxsZNJ815XFJT3vTouzV63jtvIu7Nc4nVkCLihQuDqDCScnLkmHZE5OcsMDeh0K91fYYWCharyXD5mykz5KKr-8qNdcXEt66gnwyaczSlVJAmZVa2cwoKLxqbTUGv1InTetWv3xuZcVOq2KvwJLS07HVfAF5ucW20IZkglePKT9C14nApZlG9SBdw7NFxQsPmwBf6ctTZJw0M8"
-            />
+            <div className="w-8 h-8 rounded-md bg-primary/15 border border-primary/35 flex items-center justify-center text-primary transition-transform group-hover:scale-105 shadow-xs">
+              <svg className="w-5 h-5 fill-none stroke-current" strokeWidth="1.75" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" strokeOpacity="0.4" strokeDasharray="2 2" />
+                <circle cx="12" cy="12" r="5" />
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                <path d="M12 3v3M12 18v3M3 12h3M18 12h3" strokeLinecap="round" />
+              </svg>
+            </div>
             <span className="font-headline-sm text-headline-sm italic tracking-tight text-on-surface font-normal">
               pagepulse.
             </span>
@@ -208,12 +211,12 @@ export default function TopNavigation() {
 
             {/* Profile Avatar */}
             <div className="flex items-center gap-space-xs pl-space-xs">
-              <img
-                alt="Profile"
-                className="w-8 h-8 rounded-full object-cover ring-1 ring-surface-variant cursor-pointer hover:ring-primary transition-all"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp21O53ry4gPGB-OZcu9guWj_8EZpFosyaLW50Ooub493MfHY2Zi0yiwf1GOv5N_HVmDDGwxS4F29sGkB5JHwQc_YzQazk6woycoz3uOxHMfIlXsltmNFOSbsCZSbXJw7AzXlEDnkpZz0v4mDb424awpxVXL_HrAqR9IwYJb5KlwyYoUdcx3C6OxNWuByRDEU3tbcf0SpiJLF7cn17OCy1OUyAR-Nx6G2Dg9i8YAztM2wOMpGgmL0I"
+              <div
+                className="w-8 h-8 rounded-full bg-surface-container-high border border-sandstone flex items-center justify-center text-on-surface font-label-sm text-label-sm font-medium cursor-pointer hover:border-primary transition-all select-none shadow-xs"
                 title="Curator Studio Profile"
-              />
+              >
+                PP
+              </div>
             </div>
 
             {/* Mobile Hamburger Button */}
