@@ -36,7 +36,7 @@ export class ApiError extends Error {
   }
 
   get userMessage() {
-    if (this.code === 'BACKEND_NOT_FOUND' || (this.status === 404 && this.message?.includes('not found'))) {
+    if (this.code === 'BACKEND_NOT_FOUND') {
       return 'PagePulse API backend is not detected at /api.';
     }
     if (this.code === 'CONNECTION_REFUSED' || this.status === 0) {
@@ -44,6 +44,9 @@ export class ApiError extends Error {
     }
     if (this.code === 'TIMEOUT') {
       return 'The operation timed out. The website or backend may be experiencing high load.';
+    }
+    if (this.code === 'NOT_FOUND') {
+      return this.message || 'The requested resource was not found.';
     }
     if (this.code === 'RATE_LIMIT_EXCEEDED' || this.status === 429) {
       return 'Rate limit reached. Please wait a moment before trying again.';

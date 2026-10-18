@@ -22,6 +22,7 @@ export default function VisualComparePage() {
   const [showExportToast, setShowExportToast] = useState(false);
   const [isRssModalOpen, setIsRssModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [localReviewed, setLocalReviewed] = useState(null);
 
   // Load comparison data whenever id or changeId changes
   useEffect(() => {
@@ -194,17 +195,27 @@ export default function VisualComparePage() {
   const snapshot = comparison.snapshots?.[activeSnapshotId] || comparison.snapshots?.['#849'] || Object.values(comparison.snapshots || {})[0];
   const hasScreenshots = snapshot?.hasScreenshots ?? true;
 
-  // Check if this target is reviewed in state
+  // Check if this target or change is reviewed in state
   const targetMonitor = monitors.find(m => m.id === id || m.compareId === id);
-  const isReviewed = targetMonitor ? targetMonitor.isReviewed : false;
+  const matchedChange = history.find(h => h.id === id || h.changeId === id || (changeIdParam && h.id === changeIdParam));
+  const isReviewed = localReviewed !== null
+    ? localReviewed
+    : (targetMonitor?.isReviewed || matchedChange?.isReviewed || false);
 
   const handleSelectSnapshot = (snapId) => {
     setActiveSnapshotId(snapId);
     changeService.selectSnapshot(id, snapId);
   };
 
-  const handleToggleReviewed = () => {
-    toggleChangeReview(id);
+  const handleToggleReviewed = async () => {
+    const nextReviewed = !isReviewed;
+    setLocalReviewed(nextReviewed);
+    const targetId = changeIdParam || matchedChange?.id || comparison?.changeId || id;
+    try {
+      await toggleChangeReview(targetId);
+    } catch (err) {
+      console.warn('[VisualComparePage] toggleChangeReview notice:', err?.message);
+    }
   };
 
   const handleExport = () => {

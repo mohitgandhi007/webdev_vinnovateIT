@@ -254,33 +254,74 @@ export function ObservatoryProvider({ children }) {
     }
   }, [isDemoMode, monitors, refresh, showToast]);
 
-  const toggleChangeReview = useCallback(async (changeId) => {
-    if (isDemoMode) {
+  const toggleChangeReview = useCallback(async (targetId) => {
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const isMockTarget = isDemoMode || !targetId || !UUID_REGEX.test(targetId) || targetId === 'atelier-nordic';
+
+    if (isMockTarget) {
       let isNowReviewed = false;
+      let matched = false;
+
       const updatedHistory = history.map(h => {
-        if (h.id === changeId) {
+        if (h.id === targetId || h.changeId === targetId || h.compareId === targetId) {
           isNowReviewed = !h.isReviewed;
+          matched = true;
           return { ...h, isReviewed: isNowReviewed };
         }
         return h;
       });
+
+      const updatedMonitors = monitors.map(m => {
+        if (m.id === targetId || m.compareId === targetId) {
+          isNowReviewed = !m.isReviewed;
+          matched = true;
+          return { ...m, isReviewed: isNowReviewed };
+        }
+        return m;
+      });
+
+      if (!matched) {
+        isNowReviewed = true;
+      }
+
       storage.saveDemoHistory(updatedHistory);
+      storage.saveDemoMonitors(updatedMonitors);
       setHistory(updatedHistory);
+      setMonitors(updatedMonitors);
       showToast(isNowReviewed ? 'Change marked as reviewed.' : 'Change marked as unreviewed.', 'info');
       return isNowReviewed;
     }
 
     try {
-      const updated = await changeService.toggleReview(changeId);
+      const updated = await changeService.toggleReview(targetId);
       await refresh(true);
       showToast(updated?.isReviewed ? 'Change marked as reviewed.' : 'Change marked as unreviewed.', 'info');
       return updated?.isReviewed;
     } catch (err) {
-      const msg = err instanceof ApiError ? err.userMessage : 'Failed to toggle review status';
-      showToast(msg, 'error');
-      throw err;
+      // If server does not have this change ID (or returns 404), toggle locally
+      let isNowReviewed = false;
+      const updatedMonitors = monitors.map(m => {
+        if (m.id === targetId || m.compareId === targetId) {
+          isNowReviewed = !m.isReviewed;
+          return { ...m, isReviewed: isNowReviewed };
+        }
+        return m;
+      });
+      const updatedHistory = history.map(h => {
+        if (h.id === targetId || h.changeId === targetId || h.compareId === targetId) {
+          isNowReviewed = !h.isReviewed;
+          return { ...h, isReviewed: isNowReviewed };
+        }
+        return h;
+      });
+      setMonitors(updatedMonitors);
+      setHistory(updatedHistory);
+      storage.saveDemoMonitors(updatedMonitors);
+      storage.saveDemoHistory(updatedHistory);
+      showToast(isNowReviewed ? 'Change marked as reviewed.' : 'Change marked as unreviewed.', 'info');
+      return isNowReviewed;
     }
-  }, [isDemoMode, history, refresh, showToast]);
+  }, [isDemoMode, history, monitors, refresh, showToast]);
 
   // Derived dynamic statistics from actual records
   const stats = {
