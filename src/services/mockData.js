@@ -125,8 +125,8 @@ export const DEFAULT_STORE = {
       snapshots: {
         '#849': {
           id: '#849',
-          timestamp: '15 Oct, 10:30 UTC · Current',
-          baselineTimestamp: '14 Oct, 10:30 UTC · Baseline',
+          timestamp: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC · Current',
+          baselineTimestamp: new Date(Date.now() - 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + new Date(Date.now() - 86400000).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC · Baseline',
           baselineVersion: 'v1.8.4',
           hasScreenshots: true,
           baselineTier: {

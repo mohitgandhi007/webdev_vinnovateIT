@@ -115,8 +115,12 @@ export default function VisualComparePage() {
             snapshots: {
               current: {
                 id: current?.id || 'current',
-                timestamp: current?.captured_at ? new Date(current.captured_at).toLocaleString() : 'Recent Capture',
-                baselineTimestamp: baseline?.captured_at ? new Date(baseline.captured_at).toLocaleString() : 'Baseline Capture',
+                timestamp: current?.captured_at 
+                  ? new Date(current.captured_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + new Date(current.captured_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' · Current'
+                  : 'Recent Capture',
+                baselineTimestamp: baseline?.captured_at 
+                  ? new Date(baseline.captured_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + new Date(baseline.captured_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' · Baseline'
+                  : 'Baseline Capture',
                 hasScreenshots,
                 currentScreenshotUrl,
                 baselineScreenshotUrl,
@@ -204,7 +208,11 @@ export default function VisualComparePage() {
 
   const handleSelectSnapshot = (snapId) => {
     setActiveSnapshotId(snapId);
-    changeService.selectSnapshot(id, snapId);
+    if (snapId && snapId !== 'current' && snapId !== '#849') {
+      navigate(`/compare/${id}?current=${snapId}`);
+    } else {
+      changeService.selectSnapshot(id, snapId);
+    }
   };
 
   const handleToggleReviewed = async () => {

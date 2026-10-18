@@ -15,6 +15,10 @@ export function getApiBaseUrl() {
     : '/api';
 }
 
+export const API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL)
+  ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '')
+  : '/api';
+
 export function setCustomApiBaseUrl(url) {
   if (typeof window === 'undefined') return;
   if (!url || !url.trim()) {
@@ -155,7 +159,7 @@ export const apiClient = {
   post: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'POST', body }),
   patch: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'PATCH', body }),
   delete: (endpoint, options = {}) => request(endpoint, { ...options, method: 'DELETE' }),
-  getBaseUrl: () => API_BASE_URL
+  getBaseUrl: () => getApiBaseUrl()
 };
 
 // Resource Clients
@@ -178,12 +182,12 @@ export const monitorsApi = {
   getFeedMeta: (id) => apiClient.get(`/monitors/${id}/feed-token`),
   rotateFeedToken: (id) => apiClient.post(`/monitors/${id}/feed-token/rotate`),
   revokeFeedToken: (id) => apiClient.delete(`/monitors/${id}/feed-token`),
-  getRssFeedUrl: (id, token) => `${API_BASE_URL}/monitors/${id}/rss.xml?token=${token}`
+  getRssFeedUrl: (id, token) => `${getApiBaseUrl()}/monitors/${id}/rss.xml?token=${token}`
 };
 
 export const snapshotsApi = {
   get: (id) => apiClient.get(`/snapshots/${id}`),
-  getScreenshotUrl: (id) => `${API_BASE_URL}/snapshots/${id}/screenshot`
+  getScreenshotUrl: (id) => `${getApiBaseUrl()}/snapshots/${id}/screenshot`
 };
 
 export const changesApi = {
