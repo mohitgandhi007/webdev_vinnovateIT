@@ -109,7 +109,9 @@ export default function MonitorsPage() {
 
     let cleanUrl = formUrl.trim();
     if (!/^https?:\/\//i.test(cleanUrl)) {
-      cleanUrl = `https://${cleanUrl}`;
+      cleanUrl = cleanUrl.startsWith('localhost') || cleanUrl.startsWith('127.0.0.1')
+        ? `http://${cleanUrl}`
+        : `https://${cleanUrl}`;
     }
 
     setIsInspecting(true);
@@ -149,7 +151,9 @@ export default function MonitorsPage() {
 
     let urlToTest = rawUrl.trim();
     if (!/^https?:\/\//i.test(urlToTest)) {
-      urlToTest = `https://${urlToTest}`;
+      urlToTest = urlToTest.startsWith('localhost') || urlToTest.startsWith('127.0.0.1')
+        ? `http://${urlToTest}`
+        : `https://${urlToTest}`;
     }
 
     try {
@@ -157,8 +161,9 @@ export default function MonitorsPage() {
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
         return 'Only HTTP and HTTPS protocols are supported.';
       }
-      if (!parsed.hostname || !parsed.hostname.includes('.')) {
-        return 'Please enter a valid hostname (e.g., example.com).';
+      const isLocalhost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname.endsWith('.localhost');
+      if (!parsed.hostname || (!parsed.hostname.includes('.') && !isLocalhost)) {
+        return 'Please enter a valid hostname (e.g., example.com or localhost).';
       }
       return '';
     } catch (e) {
@@ -181,7 +186,9 @@ export default function MonitorsPage() {
 
     let cleanUrl = formUrl.trim();
     if (!/^https?:\/\//i.test(cleanUrl)) {
-      cleanUrl = `https://${cleanUrl}`;
+      cleanUrl = cleanUrl.startsWith('localhost') || cleanUrl.startsWith('127.0.0.1')
+        ? `http://${cleanUrl}`
+        : `https://${cleanUrl}`;
     }
 
     try {
