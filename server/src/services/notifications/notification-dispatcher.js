@@ -4,6 +4,8 @@ import { NotificationRuleEvaluator } from './rule-evaluator.js';
 import { DiscordProvider } from './providers/discord.provider.js';
 import { TelegramProvider } from './providers/telegram.provider.js';
 import { EmailProvider } from './providers/email.provider.js';
+import { WebPushProvider } from './providers/web-push.provider.js';
+import { webPushService } from './web-push.service.js';
 import { logger } from '../../utils/logger.js';
 
 export class NotificationDispatcher {
@@ -11,8 +13,12 @@ export class NotificationDispatcher {
     this.providers = {
       discord: providers.discord || new DiscordProvider(),
       telegram: providers.telegram || new TelegramProvider(),
-      email: providers.email || new EmailProvider()
+      email: providers.email || new EmailProvider(),
+      webpush: providers.webpush || new WebPushProvider()
     };
+    if (providers.webpush) {
+      webPushService.setProvider(providers.webpush);
+    }
   }
 
   /**
@@ -20,6 +26,9 @@ export class NotificationDispatcher {
    */
   setProvider(channel, providerInstance) {
     this.providers[channel] = providerInstance;
+    if (channel === 'webpush') {
+      webPushService.setProvider(providerInstance);
+    }
   }
 
   /**
@@ -111,6 +120,22 @@ export class NotificationDispatcher {
       }
     }
 
+    // Dispatch to registered browser Web Push subscriptions
+    try {
+      const pushResults = await webPushService.dispatchForChange({
+        changeRecord,
+        monitor,
+        baselineSnapshot,
+        currentSnapshot,
+        insight
+      });
+      if (pushResults && pushResults.length > 0) {
+        results.push(...pushResults);
+      }
+    } catch (pushErr) {
+      logger.error('Failed to dispatch web push notifications for change:', { error: pushErr.message });
+    }
+
     return results;
   }
 
@@ -123,57 +148,71 @@ export class NotificationDispatcher {
     const workspaceId = monitor.workspace_id;
     const destinations = await destinationRepository.findByWorkspaceId(workspaceId, { is_active: true });
 
-    if (destinations.length === 0) return [];
-
     const results = [];
 
-    const event = {
-      type: 'failure',
-      consecutiveFailures,
-      monitor
-    };
+    if (destinations.length > 0) {
+      const event = {
+        type: 'failure',
+        consecutiveFailures,
+        monitor
+      };
 
-    for (const destination of destinations) {
-      try {
-        const evaluation = NotificationRuleEvaluator.evaluate(destination, event);
+      for (const destination of destinations) {
+        try {
+          const evaluation = NotificationRuleEvaluator.evaluate(destination, event);
 
-        if (!evaluation.shouldNotify) {
-          continue;
+          if (!evaluation.shouldNotify) {
+            continue;
+          }
+
+          // Deduplication key per failure streak
+          const dedupKey = `${destination.id}:failure_${monitor.id}_streak_${consecutiveFailures}:failure`;
+
+          const existing = await deliveryRepository.findByDedupKey(dedupKey);
+          if (existing && (existing.status === 'delivered' || existing.status === 'pending')) {
+            continue;
+          }
+
+          const payload = {
+            title: `Degraded Monitor: ${monitor.name}`,
+            summary: `The monitor has failed ${consecutiveFailures} consecutive checks. Error: ${error?.message || 'Page load failure'}.`,
+            monitorName: monitor.name,
+            monitorUrl: monitor.url,
+            importance: 'high',
+            isFailure: true,
+            compareUrl: `http://localhost:5173/monitors`
+          };
+
+          const delivery = await this.deliver({
+            destination,
+            payload,
+            dedupKey,
+            triggerType: 'failure',
+            changeId: null,
+            monitorId: monitor.id
+          });
+
+          results.push(delivery);
+        } catch (err) {
+          logger.error(`Failed to dispatch failure notification to ${destination.id}:`, {
+            error: err.message
+          });
         }
-
-        // Deduplication key per failure streak
-        const dedupKey = `${destination.id}:failure_${monitor.id}_streak_${consecutiveFailures}:failure`;
-
-        const existing = await deliveryRepository.findByDedupKey(dedupKey);
-        if (existing && (existing.status === 'delivered' || existing.status === 'pending')) {
-          continue;
-        }
-
-        const payload = {
-          title: `Degraded Monitor: ${monitor.name}`,
-          summary: `The monitor has failed ${consecutiveFailures} consecutive checks. Error: ${error?.message || 'Page load failure'}.`,
-          monitorName: monitor.name,
-          monitorUrl: monitor.url,
-          importance: 'high',
-          isFailure: true,
-          compareUrl: `http://localhost:5173/monitors`
-        };
-
-        const delivery = await this.deliver({
-          destination,
-          payload,
-          dedupKey,
-          triggerType: 'failure',
-          changeId: null,
-          monitorId: monitor.id
-        });
-
-        results.push(delivery);
-      } catch (err) {
-        logger.error(`Failed to dispatch failure notification to ${destination.id}:`, {
-          error: err.message
-        });
       }
+    }
+
+    // Also dispatch failure alerts to registered Web Push subscriptions
+    try {
+      const pushResults = await webPushService.dispatchForFailure({
+        monitor,
+        consecutiveFailures,
+        error: error?.message || String(error || 'Page load failure')
+      });
+      if (pushResults && pushResults.length > 0) {
+        results.push(...pushResults);
+      }
+    } catch (pushErr) {
+      logger.error('Failed to dispatch web push notifications for failure:', { error: pushErr.message });
     }
 
     return results;

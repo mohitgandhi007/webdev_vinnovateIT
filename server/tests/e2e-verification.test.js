@@ -24,9 +24,11 @@ describe('Phase 11: End-to-End System Verification Test Suite', () => {
   let baseUrl;
   let defaultWorkspace;
   const dispatchedNotifications = [];
+  const originalIsConfigured = geminiService.isConfigured;
 
   before(async () => {
     process.env.ALLOW_LOCAL_FIXTURES = 'true';
+    geminiService.isConfigured = () => false;
     context = setupTestDatabase();
     app = context.app;
     pool = context.pool;
@@ -46,6 +48,7 @@ describe('Phase 11: End-to-End System Verification Test Suite', () => {
   });
 
   after(async () => {
+    geminiService.isConfigured = originalIsConfigured;
     delete process.env.ALLOW_LOCAL_FIXTURES;
     await browserPool.closeAll();
     await fixtureServer.stop();
@@ -349,8 +352,13 @@ describe('Phase 11: End-to-End System Verification Test Suite', () => {
       assert.equal(priceChanges[0].percentDelta, 20.02);
       assert.ok(priceChanges[0].explanation.includes('+20.02%'));
 
-      // 9. Verify stored insight created and linked to change record
-      const insight = await insightRepository.findByChangeId(changeId);
+      // 9. Verify stored insight created and linked to change record (poll async generation)
+      let insight = null;
+      for (let i = 0; i < 40; i++) {
+        insight = await insightRepository.findByChangeId(changeId);
+        if (insight) break;
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
       assert.ok(insight, 'Insight should be generated for detected change');
       assert.equal(insight.detected_change_id, changeId);
       assert.ok(insight.summary.length > 0);

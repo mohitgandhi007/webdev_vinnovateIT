@@ -1,13 +1,30 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { notificationsApi } from '../../services/apiClient';
+import { webPushService } from '../../services/webPushService';
 
 export default function NotificationSettingsModal({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState('destinations'); // 'destinations' | 'deliveries' | 'new'
+  const [activeTab, setActiveTab] = useState('push'); // 'push' | 'destinations' | 'deliveries' | 'new'
   const [destinations, setDestinations] = useState([]);
   const [deliveries, setDeliveries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [testingId, setTestingId] = useState(null);
   const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
+
+  // Web Push states
+  const [pushStatus, setPushStatus] = useState({
+    supported: true,
+    permission: 'default',
+    isSubscribed: false,
+    endpoint: null,
+    serverConfigured: false
+  });
+  const [pushPrefs, setPushPrefs] = useState({
+    notify_on_change: true,
+    notify_on_failure: false,
+    importance: 'all'
+  });
+  const [isPushActionLoading, setIsPushActionLoading] = useState(false);
+  const [isTestingPush, setIsTestingPush] = useState(false);
 
   // Form states
   const [formName, setFormName] = useState('');
@@ -45,14 +62,106 @@ export default function NotificationSettingsModal({ isOpen, onClose }) {
     }
   }, []);
 
+  const refreshPushStatus = useCallback(async () => {
+    try {
+      const status = await webPushService.checkStatus();
+      setPushStatus(status);
+      if (status.storedSubscription?.preferences) {
+        setPushPrefs(status.storedSubscription.preferences);
+      }
+    } catch (err) {
+      console.warn('Failed to inspect push status:', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       fetchDestinations();
       fetchDeliveries();
+      refreshPushStatus();
       setFeedback(null);
       setFormError('');
     }
-  }, [isOpen, fetchDestinations, fetchDeliveries]);
+  }, [isOpen, fetchDestinations, fetchDeliveries, refreshPushStatus]);
+
+  const handleEnablePush = async () => {
+    setIsPushActionLoading(true);
+    setFeedback(null);
+    try {
+      await webPushService.subscribe(pushPrefs);
+      await refreshPushStatus();
+      setFeedback({
+        type: 'success',
+        message: 'Browser push notifications successfully enabled and registered ✓'
+      });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to enable browser notifications'
+      });
+      await refreshPushStatus();
+    } finally {
+      setIsPushActionLoading(false);
+    }
+  };
+
+  const handleDisablePush = async () => {
+    setIsPushActionLoading(true);
+    setFeedback(null);
+    try {
+      await webPushService.unsubscribe();
+      await refreshPushStatus();
+      setFeedback({
+        type: 'success',
+        message: 'Browser push notifications deactivated.'
+      });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to disable browser notifications'
+      });
+    } finally {
+      setIsPushActionLoading(false);
+    }
+  };
+
+  const handleTestPush = async () => {
+    setIsTestingPush(true);
+    setFeedback(null);
+    try {
+      await webPushService.sendTestNotification();
+      setFeedback({
+        type: 'success',
+        message: 'Test notification sent! Check your operating system notification banner.'
+      });
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err.message || 'Failed to deliver test notification'
+      });
+    } finally {
+      setIsTestingPush(false);
+    }
+  };
+
+  const handleUpdatePushPrefs = async (updates) => {
+    const nextPrefs = { ...pushPrefs, ...updates };
+    setPushPrefs(nextPrefs);
+    if (pushStatus.isSubscribed) {
+      try {
+        await webPushService.updatePreferences(nextPrefs);
+        setFeedback({
+          type: 'success',
+          message: 'Notification alert preferences saved.'
+        });
+      } catch (err) {
+        setFeedback({
+          type: 'error',
+          message: err.message || 'Failed to update preferences'
+        });
+      }
+    }
+  };
 
   const handleTest = async (destinationId) => {
     try {
@@ -191,7 +300,21 @@ export default function NotificationSettingsModal({ isOpen, onClose }) {
         )}
 
         {/* TABS */}
-        <div className="flex border-b border-sandstone px-6 bg-surface-container-lowest">
+        <div className="flex border-b border-sandstone px-6 bg-surface-container-lowest overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('push')}
+            className={`py-3 px-4 font-label-md text-label-md font-medium border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'push'
+                ? 'border-primary text-primary font-semibold'
+                : 'border-transparent text-on-surface-variant hover:text-on-surface'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[18px]">desktop_windows</span>
+            <span>Browser Push</span>
+            {pushStatus.isSubscribed && (
+              <span className="w-2 h-2 rounded-full bg-primary inline-block"></span>
+            )}
+          </button>
           <button
             onClick={() => setActiveTab('destinations')}
             className={`py-3 px-4 font-label-md text-label-md font-medium border-b-2 transition-colors ${
@@ -226,6 +349,164 @@ export default function NotificationSettingsModal({ isOpen, onClose }) {
 
         {/* TAB CONTENTS */}
         <div className="p-6 overflow-y-auto flex-1">
+          {/* TAB: BROWSER PUSH NOTIFICATIONS */}
+          {activeTab === 'push' && (
+            <div className="flex flex-col gap-6">
+              {/* STATUS CARD */}
+              <div className="p-5 rounded-lg border border-sandstone bg-surface-container-low flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center text-primary shrink-0">
+                      <span className="material-symbols-outlined text-[22px]">
+                        {pushStatus.isSubscribed ? 'notifications_active' : 'notifications'}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-headline-sm text-headline-sm text-on-surface font-normal">
+                        Real-Time Browser Push
+                      </h3>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant">
+                        Standards-based Web Push via service workers. Dispatches alerts even when PagePulse is closed.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* STATUS BADGE */}
+                  <div className="shrink-0">
+                    {!pushStatus.supported ? (
+                      <span className="px-3 py-1 rounded-full font-label-sm text-xs bg-surface-container text-tertiary border border-sandstone">
+                        Browser Unsupported
+                      </span>
+                    ) : pushStatus.permission === 'denied' ? (
+                      <span className="px-3 py-1 rounded-full font-label-sm text-xs bg-error/15 text-error border border-error/30 font-medium">
+                        Permission Blocked
+                      </span>
+                    ) : pushStatus.isSubscribed ? (
+                      <span className="px-3 py-1 rounded-full font-label-sm text-xs bg-primary/15 text-primary border border-primary/30 font-medium flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                        Active Subscription
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full font-label-sm text-xs bg-surface-container text-on-surface-variant border border-sandstone">
+                        Not Enabled
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* EXPLANATORY / GUIDANCE NOTES */}
+                {!pushStatus.supported && (
+                  <div className="p-3 bg-surface-container rounded border border-sandstone/60 text-body-sm text-on-surface-variant">
+                    Your current browser does not expose the Push API or Service Worker API. Use a modern Chromium, Firefox, or Safari 16+ browser on macOS/Windows/Linux.
+                  </div>
+                )}
+
+                {pushStatus.supported && pushStatus.permission === 'denied' && (
+                  <div className="p-3 bg-error/10 rounded border border-error/25 text-body-sm text-error flex items-start gap-2">
+                    <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5">lock</span>
+                    <div>
+                      <strong>Notifications are blocked.</strong> To receive push alerts, click the lock/settings icon next to your browser address bar and change Notifications to <em>"Allow"</em>, then reload.
+                    </div>
+                  </div>
+                )}
+
+                {/* PRIMARY ACTION BUTTONS */}
+                {pushStatus.supported && pushStatus.permission !== 'denied' && (
+                  <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-sandstone/60">
+                    {!pushStatus.isSubscribed ? (
+                      <button
+                        type="button"
+                        onClick={handleEnablePush}
+                        disabled={isPushActionLoading}
+                        className="px-5 py-2.5 rounded bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container disabled:opacity-50 transition-colors flex items-center gap-2 shadow-xs cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">add_alert</span>
+                        <span>{isPushActionLoading ? 'Requesting Permission & Subscribing...' : 'Enable Browser Notifications'}</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleTestPush}
+                          disabled={isTestingPush}
+                          className="px-4 py-2 rounded bg-surface-container hover:bg-surface-container-high border border-sandstone text-on-surface font-label-md text-label-md transition-colors flex items-center gap-2 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[18px] text-primary">send</span>
+                          <span>{isTestingPush ? 'Dispatching Test...' : 'Send Test Push'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDisablePush}
+                          disabled={isPushActionLoading}
+                          className="px-4 py-2 rounded border border-error/30 text-error hover:bg-error/10 font-label-md text-label-md transition-colors flex items-center gap-2 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">notifications_off</span>
+                          <span>Disable Notifications</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* ALERT PREFERENCES */}
+              <div className="p-5 rounded-lg border border-sandstone bg-surface-container-lowest flex flex-col gap-4">
+                <h4 className="font-headline-sm text-headline-sm text-on-surface font-normal">
+                  Alert Trigger Preferences
+                </h4>
+                <p className="font-body-sm text-body-sm text-on-surface-variant -mt-2">
+                  Configure which events trigger an immediate notification dispatch to your desktop.
+                </p>
+
+                <div className="space-y-3 pt-1">
+                  <label className="flex items-start gap-3 text-body-sm text-on-surface cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={pushPrefs.notify_on_change}
+                      onChange={(e) => handleUpdatePushPrefs({ notify_on_change: e.target.checked })}
+                      className="accent-primary rounded mt-0.5"
+                    />
+                    <div>
+                      <span className="font-medium block text-on-surface">Meaningful Content Alterations</span>
+                      <span className="text-on-surface-variant text-xs">
+                        Dispatches when semantic DOM text or monitored layout elements shift from baseline.
+                      </span>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start gap-3 text-body-sm text-on-surface cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={pushPrefs.notify_on_failure}
+                      onChange={(e) => handleUpdatePushPrefs({ notify_on_failure: e.target.checked })}
+                      className="accent-primary rounded mt-0.5"
+                    />
+                    <div>
+                      <span className="font-medium block text-on-surface">Target Failure &amp; Connectivity Drops</span>
+                      <span className="text-on-surface-variant text-xs">
+                        Dispatches when a monitored site drops 2+ consecutive checks due to DNS, HTTP errors, or timeouts.
+                      </span>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="pt-3 border-t border-sandstone/60 flex flex-col gap-2">
+                  <label className="font-label-sm text-label-sm text-tertiary uppercase tracking-wider font-semibold">
+                    Importance Filter
+                  </label>
+                  <select
+                    value={pushPrefs.importance || 'all'}
+                    onChange={(e) => handleUpdatePushPrefs({ importance: e.target.value })}
+                    className="w-full sm:w-64 px-3 py-2 rounded border border-sandstone bg-surface-container-low text-on-surface font-body-sm text-body-sm focus:outline-hidden focus:border-primary"
+                  >
+                    <option value="all">All Detected Changes (Standard)</option>
+                    <option value="high">High Importance Only (Strict Filter)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'destinations' && (
             <div className="flex flex-col gap-4">
               {isLoading ? (

@@ -51,4 +51,10 @@ router.post(
   notificationsController.retryDelivery
 );
 
+import webPushRouter from './web-push.routes.js';
+
+// Browser Web Push Notifications Sub-router
+router.use('/push', webPushRouter);
+router.use('/web-push', webPushRouter);
+
 export default router;

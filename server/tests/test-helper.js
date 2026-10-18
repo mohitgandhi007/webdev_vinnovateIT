@@ -51,6 +51,7 @@ export function setupTestDatabase() {
       // Clear data from tables in dependency order
       await testPool.query('DELETE FROM notification_deliveries;');
       await testPool.query('DELETE FROM notification_destinations;');
+      await testPool.query('DELETE FROM web_push_subscriptions;');
       await testPool.query('DELETE FROM ai_insights;');
       await testPool.query('DELETE FROM detected_changes;');
       await testPool.query('DELETE FROM numeric_metric_series;');

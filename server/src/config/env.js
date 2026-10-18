@@ -4,6 +4,8 @@ import path from 'path';
 // Load .env file if present
 dotenv.config();
 
+import webpush from 'web-push';
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
@@ -12,6 +14,19 @@ const SCREENSHOTS_DIR = process.env.SCREENSHOTS_DIR || path.resolve(process.cwd(
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const ALLOW_LOCAL_FIXTURES = process.env.ALLOW_LOCAL_FIXTURES === 'true';
+
+let VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
+let VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:alerts@pagepulse.app';
+
+// In development or test mode, auto-generate fallback VAPID keys if none provided
+if ((!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) && (NODE_ENV === 'development' || NODE_ENV === 'test')) {
+  try {
+    const generated = webpush.generateVAPIDKeys();
+    VAPID_PUBLIC_KEY = generated.publicKey;
+    VAPID_PRIVATE_KEY = generated.privateKey;
+  } catch {}
+}
 
 // Validate port range
 if (isNaN(PORT) || PORT < 1 || PORT > 65535) {
@@ -43,6 +58,10 @@ export const config = {
   geminiModel: GEMINI_MODEL,
   hasGeminiKey: Boolean(GEMINI_API_KEY && GEMINI_API_KEY.trim()),
   allowLocalFixtures: ALLOW_LOCAL_FIXTURES,
+  vapidPublicKey: VAPID_PUBLIC_KEY,
+  vapidPrivateKey: VAPID_PRIVATE_KEY,
+  vapidSubject: VAPID_SUBJECT,
+  hasVapidKeys: Boolean(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY),
   pool: {
     min: parseInt(process.env.DATABASE_POOL_MIN || '2', 10),
     max: parseInt(process.env.DATABASE_POOL_MAX || '10', 10)
