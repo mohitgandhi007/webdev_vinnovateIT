@@ -37,7 +37,7 @@ export default function VisualComparePage() {
         let activeChangeId = changeIdParam;
 
         // If id looks like a change ID or was passed via history
-        const matchedChange = history.find(h => h.id === id || h.changeId === id);
+        const matchedChange = history.find(h => h.id === id || h.changeId === id || h.monitorId === id);
         if (matchedChange) {
           monitorId = matchedChange.monitorId;
           baselineId = matchedChange.baselineSnapshotId;
@@ -108,7 +108,8 @@ export default function VisualComparePage() {
             title: monitor?.name || 'Monitored Target',
             url: monitor?.url || '',
             monitorId: monitor?.id,
-            changeId: activeChangeId,
+            changeId: activeChangeId || compareData.changeId,
+            isReviewed: compareData.isReviewed,
             baseline,
             current,
             diff,
@@ -201,10 +202,15 @@ export default function VisualComparePage() {
 
   // Check if this target or change is reviewed in state
   const targetMonitor = monitors.find(m => m.id === id || m.compareId === id);
-  const matchedChange = history.find(h => h.id === id || h.changeId === id || (changeIdParam && h.id === changeIdParam));
+  const matchedChange = history.find(h => 
+    h.id === id || 
+    h.changeId === id || 
+    (changeIdParam && h.id === changeIdParam) ||
+    h.monitorId === id
+  );
   const isReviewed = localReviewed !== null
     ? localReviewed
-    : (targetMonitor?.isReviewed || matchedChange?.isReviewed || false);
+    : (comparison?.isReviewed ?? (matchedChange?.isReviewed || targetMonitor?.isReviewed || false));
 
   const handleSelectSnapshot = (snapId) => {
     setActiveSnapshotId(snapId);
@@ -218,6 +224,9 @@ export default function VisualComparePage() {
   const handleToggleReviewed = async () => {
     const nextReviewed = !isReviewed;
     setLocalReviewed(nextReviewed);
+    if (comparison) {
+      setComparison(prev => prev ? { ...prev, isReviewed: nextReviewed } : null);
+    }
     const targetId = changeIdParam || matchedChange?.id || comparison?.changeId || id;
     try {
       await toggleChangeReview(targetId);

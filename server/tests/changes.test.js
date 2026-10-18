@@ -165,8 +165,11 @@ describe('Snapshots & Changes API Test Suite', () => {
       assert.ok(res.body.data.current_captured_at);
     });
 
-    it('PATCH /api/changes/:id updates review status to true', async () => {
-      const { changeId } = await seedTestMonitorWithChanges();
+    it('PATCH /api/changes/:id updates review status to true and syncs monitor is_reviewed', async () => {
+      const { changeId, monitorId } = await seedTestMonitorWithChanges();
+
+      // Put monitor in unreviewed state
+      await pool.query(`UPDATE monitors SET is_reviewed = false WHERE id = $1`, [monitorId]);
 
       const patchRes = await request(app)
         .patch(`/api/changes/${changeId}`)
@@ -177,11 +180,55 @@ describe('Snapshots & Changes API Test Suite', () => {
       assert.equal(patchRes.body.data.is_reviewed, true);
       assert.ok(patchRes.body.data.reviewed_at);
 
-      // Verify persistence
-      const getRes = await request(app)
-        .get(`/api/changes/${changeId}`)
+      // Verify monitor is_reviewed was synced back to true
+      const monRes = await pool.query(`SELECT is_reviewed FROM monitors WHERE id = $1`, [monitorId]);
+      assert.equal(monRes.rows[0].is_reviewed, true);
+    });
+
+    it('PATCH /api/changes/:monitorId marks all changes for monitor as reviewed and syncs monitor is_reviewed', async () => {
+      const { changeId, monitorId } = await seedTestMonitorWithChanges();
+
+      // Put monitor in unreviewed state
+      await pool.query(`UPDATE monitors SET is_reviewed = false WHERE id = $1`, [monitorId]);
+
+      const patchRes = await request(app)
+        .patch(`/api/changes/${monitorId}`)
+        .send({ is_reviewed: true })
         .expect(200);
-      assert.equal(getRes.body.data.is_reviewed, true);
+
+      assert.equal(patchRes.body.success, true);
+
+      // Verify change record is reviewed
+      const chgRes = await pool.query(`SELECT is_reviewed FROM detected_changes WHERE id = $1`, [changeId]);
+      assert.equal(chgRes.rows[0].is_reviewed, true);
+
+      // Verify monitor is_reviewed was synced back to true
+      const monRes = await pool.query(`SELECT is_reviewed FROM monitors WHERE id = $1`, [monitorId]);
+      assert.equal(monRes.rows[0].is_reviewed, true);
+    });
+
+    it('GET /api/monitors/:id/compare returns active changeId and isReviewed', async () => {
+      const { monitorId, changeId } = await seedTestMonitorWithChanges();
+
+      const compRes = await request(app)
+        .get(`/api/monitors/${monitorId}/compare`)
+        .expect(200);
+
+      assert.equal(compRes.body.success, true);
+      assert.equal(compRes.body.data.changeId, changeId);
+      assert.equal(compRes.body.data.isReviewed, false);
+
+      // Review it and re-check
+      await request(app)
+        .patch(`/api/changes/${changeId}`)
+        .send({ is_reviewed: true })
+        .expect(200);
+
+      const compRes2 = await request(app)
+        .get(`/api/monitors/${monitorId}/compare`)
+        .expect(200);
+
+      assert.equal(compRes2.body.data.isReviewed, true);
     });
 
     it('PATCH /api/changes/:id rejects non-boolean is_reviewed', async () => {

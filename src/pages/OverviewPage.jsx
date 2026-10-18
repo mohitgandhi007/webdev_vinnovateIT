@@ -121,10 +121,10 @@ export default function OverviewPage() {
         </section>
       ) : (
         <>
-          {/* SECTION 3: THE LATEST DISCOVERY (Derived from real latest change or newest monitor) */}
-          {history.length > 0 ? (
+          {/* SECTION 3: THE LATEST DISCOVERY (Shown when unreviewed shifts exist; otherwise shows nominal steady state) */}
+          {stats.unreviewedChanges > 0 ? (
             (() => {
-              const latestChange = history[0];
+              const latestChange = history.find(h => !h.isReviewed) || history[0];
               const isReviewed = latestChange.isReviewed;
               return (
                 <section className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-stretch">
@@ -170,7 +170,7 @@ export default function OverviewPage() {
                         </div>
                         <div className="pt-2">
                           <button
-                            onClick={() => navigate(`/compare/${latestChange.compareId || latestChange.id}`)}
+                            onClick={() => navigate(`/compare/${latestChange.compareId || latestChange.id}?changeId=${latestChange.id}`)}
                             className="w-full py-2 text-center font-label-sm text-label-sm text-on-primary rounded bg-primary hover:bg-primary-container transition-colors shadow-xs"
                           >
                             Inspect Full Telemetry Diff
@@ -202,7 +202,7 @@ export default function OverviewPage() {
                     </div>
                     <div className="pt-space-lg">
                       <button
-                        onClick={() => navigate(`/compare/${latestChange.compareId || latestChange.id}`)}
+                        onClick={() => navigate(`/compare/${latestChange.compareId || latestChange.id}?changeId=${latestChange.id}`)}
                         className="w-full flex items-center justify-center gap-space-sm px-space-md py-2.5 rounded bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm transition-colors shadow-sm"
                         type="button"
                       >
@@ -220,22 +220,28 @@ export default function OverviewPage() {
               return (
                 <section className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-stretch">
                   <div className="lg:col-span-7 flex flex-col justify-center p-space-xl rounded-lg bg-surface-container-lowest shadow-sm border border-sandstone">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-2 h-2 rounded-full bg-primary"></span>
-                      <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-wider">
-                        Active Monitoring Steady
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-wider">
+                          Active Monitoring Steady
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded font-label-sm text-[11px] bg-primary/10 text-primary font-medium flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                        All changes reviewed
                       </span>
                     </div>
                     <h3 className="font-headline-md text-headline-md text-on-surface">
-                      {latestMonitor.name}
+                      {latestMonitor?.name || 'All Monitored Targets'}
                     </h3>
-                    <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-                      Target <span className="font-mono text-on-surface">{latestMonitor.url}</span> is actively pulsing on a {latestMonitor.checkCadence} cadence. No drift or semantic changes have been detected yet.
+                    <p className="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+                      Target <span className="font-mono text-on-surface">{latestMonitor?.url || 'destinations'}</span> is actively pulsing on a {latestMonitor?.checkCadence || '15m'} cadence. All detected alterations are marked reviewed and baselines are locked.
                     </p>
                     <div className="mt-4 flex items-center gap-3">
-                      <span className="text-label-sm text-tertiary">Status: {latestMonitor.status}</span>
+                      <span className="text-label-sm text-tertiary">Status: {latestMonitor?.status || 'healthy'}</span>
                       <span className="text-tertiary">·</span>
-                      <span className="text-label-sm text-tertiary">Last Check: {latestMonitor.lastChecked}</span>
+                      <span className="text-label-sm text-tertiary">Last Check: {latestMonitor?.lastChecked || 'Recently'}</span>
                     </div>
                   </div>
                   <div className="lg:col-span-5 flex flex-col justify-between p-space-xl rounded-lg bg-surface-container-lowest shadow-sm border border-sandstone">
@@ -250,13 +256,19 @@ export default function OverviewPage() {
                         PagePulse will continuously snapshot this destination. If pricing, DOM nodes, or layout alter, instant alerts and structured comparisons will trigger.
                       </p>
                     </div>
-                    <div className="pt-4">
+                    <div className="pt-4 flex items-center gap-3">
                       <button
                         onClick={() => navigate('/monitors')}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-primary text-on-primary font-body-sm text-body-sm hover:bg-primary-container transition-colors"
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-primary text-on-primary font-body-sm text-body-sm hover:bg-primary-container transition-colors shadow-sm"
                       >
                         <span>Manage Monitors</span>
                         <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                      </button>
+                      <button
+                        onClick={() => navigate('/history')}
+                        className="px-4 py-2.5 rounded bg-surface-container text-on-surface font-body-sm text-body-sm hover:bg-surface-container-high transition-colors border border-sandstone flex items-center gap-1.5"
+                      >
+                        <span>Journal</span>
                       </button>
                     </div>
                   </div>
@@ -312,7 +324,7 @@ export default function OverviewPage() {
                     <div className="flex items-center gap-space-md shrink-0 self-end sm:self-center">
                       <StatusIndicator status={item.isReviewed ? 'healthy' : 'attention'} showDot={false} label={item.status} />
                       <Link
-                        to={`/compare/${item.compareId || item.id}`}
+                        to={`/compare/${item.compareId || item.id}?changeId=${item.id}`}
                         className="font-body-sm text-body-sm text-primary hover:text-primary-container inline-flex items-center gap-0.5"
                       >
                         <span>Inspect diff</span>

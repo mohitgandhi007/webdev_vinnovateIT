@@ -1,3 +1,4 @@
+import { db } from '../config/database.js';
 import { monitorService } from '../services/monitor.service.js';
 import { snapshotService } from '../services/snapshot.service.js';
 import { changeService } from '../services/change.service.js';
@@ -203,6 +204,30 @@ export const monitorsController = {
         }
       );
 
+      // Find latest change record for this monitor to provide review status & changeId
+      let activeChange = null;
+      if (baselineSnap?.id && currentSnap?.id) {
+        const changeRes = await db.query(
+          `SELECT id, is_reviewed, change_type, title, description 
+           FROM detected_changes 
+           WHERE monitor_id = $1 
+             AND ((baseline_snapshot_id = $2 AND current_snapshot_id = $3) OR (baseline_snapshot_id = $3 AND current_snapshot_id = $2))
+           ORDER BY detected_at DESC LIMIT 1`,
+          [monitorId, baselineSnap.id, currentSnap.id]
+        );
+        activeChange = changeRes.rows[0] || null;
+      }
+      if (!activeChange) {
+        const fallbackRes = await db.query(
+          `SELECT id, is_reviewed, change_type, title, description 
+           FROM detected_changes 
+           WHERE monitor_id = $1 
+           ORDER BY detected_at DESC LIMIT 1`,
+          [monitorId]
+        );
+        activeChange = fallbackRes.rows[0] || null;
+      }
+
       res.status(200).json({
         success: true,
         data: {
@@ -211,6 +236,9 @@ export const monitorsController = {
           baseline: baselineSnap,
           current: currentSnap,
           diff: diffResult,
+          changeId: activeChange?.id || null,
+          isReviewed: activeChange ? Boolean(activeChange.is_reviewed) : Boolean(monitor?.is_reviewed),
+          change: activeChange,
           timeline: snaps.map(s => ({
             id: s.id,
             scanNumber: s.scan_number,

@@ -1,3 +1,4 @@
+import { db } from '../config/database.js';
 import { monitorRepository } from '../repositories/monitor.repository.js';
 import { canonicalTargetRepository } from '../repositories/canonical-target.repository.js';
 import { workspaceRepository } from '../repositories/workspace.repository.js';
@@ -156,6 +157,17 @@ export const monitorService = {
       });
 
       updateData.canonical_target_id = newTarget.id;
+    }
+
+    if (typeof updateData.is_reviewed === 'boolean') {
+      const isReviewed = updateData.is_reviewed;
+      await db.query(
+        `UPDATE detected_changes 
+         SET is_reviewed = $1, 
+             reviewed_at = CASE WHEN $1 = true THEN NOW() ELSE NULL END 
+         WHERE monitor_id = $2`,
+        [isReviewed, id]
+      );
     }
 
     const updated = await monitorRepository.update(id, updateData);

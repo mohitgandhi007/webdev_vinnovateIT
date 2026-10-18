@@ -95,14 +95,23 @@ export const changeService = {
     return normalizeChangeRecord(res?.data);
   },
 
-  async toggleReview(changeId, desiredState = null) {
+  async toggleReview(idOrMonitorId, desiredState = null) {
     let nextState = desiredState;
     if (nextState === null) {
-      const current = await this.getById(changeId);
-      nextState = !current?.isReviewed;
+      try {
+        const current = await this.getById(idOrMonitorId);
+        nextState = !current?.isReviewed;
+      } catch {
+        try {
+          const mon = await monitorsApi.get(idOrMonitorId);
+          nextState = !mon?.data?.is_reviewed;
+        } catch {
+          nextState = true;
+        }
+      }
     }
-    const res = await changesApi.updateReview(changeId, nextState);
-    return normalizeChangeRecord(res?.data);
+    const res = await changesApi.updateReview(idOrMonitorId, nextState);
+    return res?.data ? normalizeChangeRecord(res.data) : { id: idOrMonitorId, isReviewed: nextState };
   },
 
   async getSummary(changeId) {

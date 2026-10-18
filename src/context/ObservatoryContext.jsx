@@ -263,7 +263,7 @@ export function ObservatoryProvider({ children }) {
       let matched = false;
 
       const updatedHistory = history.map(h => {
-        if (h.id === targetId || h.changeId === targetId || h.compareId === targetId) {
+        if (h.id === targetId || h.changeId === targetId || h.compareId === targetId || h.monitorId === targetId) {
           isNowReviewed = !h.isReviewed;
           matched = true;
           return { ...h, isReviewed: isNowReviewed };
@@ -275,7 +275,12 @@ export function ObservatoryProvider({ children }) {
         if (m.id === targetId || m.compareId === targetId) {
           isNowReviewed = !m.isReviewed;
           matched = true;
-          return { ...m, isReviewed: isNowReviewed };
+          return {
+            ...m,
+            isReviewed: isNowReviewed,
+            status: isNowReviewed ? 'healthy' : 'changed',
+            backendStatus: isNowReviewed ? 'healthy' : 'degraded'
+          };
         }
         return m;
       });
@@ -298,17 +303,22 @@ export function ObservatoryProvider({ children }) {
       showToast(updated?.isReviewed ? 'Change marked as reviewed.' : 'Change marked as unreviewed.', 'info');
       return updated?.isReviewed;
     } catch (err) {
-      // If server does not have this change ID (or returns 404), toggle locally
+      console.warn('[ObservatoryContext] API toggle fallback to local sync:', err?.message);
       let isNowReviewed = false;
       const updatedMonitors = monitors.map(m => {
         if (m.id === targetId || m.compareId === targetId) {
           isNowReviewed = !m.isReviewed;
-          return { ...m, isReviewed: isNowReviewed };
+          return {
+            ...m,
+            isReviewed: isNowReviewed,
+            status: isNowReviewed ? 'healthy' : 'changed',
+            backendStatus: isNowReviewed ? 'healthy' : 'degraded'
+          };
         }
         return m;
       });
       const updatedHistory = history.map(h => {
-        if (h.id === targetId || h.changeId === targetId || h.compareId === targetId) {
+        if (h.id === targetId || h.changeId === targetId || h.compareId === targetId || h.monitorId === targetId) {
           isNowReviewed = !h.isReviewed;
           return { ...h, isReviewed: isNowReviewed };
         }
@@ -324,14 +334,15 @@ export function ObservatoryProvider({ children }) {
   }, [isDemoMode, history, monitors, refresh, showToast]);
 
   // Derived dynamic statistics from actual records
+  const unreviewedCount = history.filter(h => !h.isReviewed).length;
   const stats = {
     total: monitors.length,
     active: monitors.filter(m => m.isActive !== false).length,
-    changed: monitors.filter(m => m.status === 'changed' || m.backendStatus === 'degraded').length,
+    changed: unreviewedCount,
     attention: monitors.filter(m => m.status === 'attention' || m.backendStatus === 'failing' || m.backendStatus === 'blocked').length,
     paused: monitors.filter(m => m.isActive === false).length,
     healthy: monitors.filter(m => m.status === 'healthy' && m.isActive !== false).length,
-    unreviewedChanges: history.filter(h => !h.isReviewed).length
+    unreviewedChanges: unreviewedCount
   };
 
   return (

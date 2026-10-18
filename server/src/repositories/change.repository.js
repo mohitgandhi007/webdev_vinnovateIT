@@ -75,6 +75,32 @@ export const changeRepository = {
   },
 
   /**
+   * Find latest change for a monitor
+   */
+  async findLatestByMonitorId(monitorId) {
+    const query = `
+      SELECT 
+        c.*,
+        m.name AS monitor_name,
+        m.url AS monitor_url,
+        m.workspace_id,
+        bs.captured_at AS baseline_captured_at,
+        cs.captured_at AS current_captured_at,
+        bs.screenshot_path AS baseline_screenshot_path,
+        cs.screenshot_path AS current_screenshot_path
+      FROM detected_changes c
+      JOIN monitors m ON c.monitor_id = m.id
+      JOIN snapshots bs ON c.baseline_snapshot_id = bs.id
+      JOIN snapshots cs ON c.current_snapshot_id = cs.id
+      WHERE c.monitor_id = $1
+      ORDER BY c.detected_at DESC
+      LIMIT 1
+    `;
+    const res = await db.query(query, [monitorId]);
+    return res.rows[0] || null;
+  },
+
+  /**
    * Find changes for a specific monitor
    */
   async findByMonitorId(monitorId, { page = 1, limit = 20, is_reviewed } = {}) {
