@@ -12,6 +12,7 @@ import changesRoutes from './routes/changes.routes.js';
 import insightsRoutes from './routes/insights.routes.js';
 import notificationsRoutes from './routes/notifications.routes.js';
 import demoRoutes from './routes/demo.routes.js';
+import webPushRouter from './routes/web-push.routes.js';
 import { rssController } from './controllers/rss.controller.js';
 
 export function createApp() {
@@ -57,6 +58,7 @@ export function createApp() {
   app.use('/api/changes', changesRoutes);
   app.use('/api/insights', insightsRoutes);
   app.use('/api/notifications', notificationsRoutes);
+  app.use('/api/push', webPushRouter);
   app.get('/api/feeds/monitors/:id.xml', rssController.getFeed);
 
   // Production Frontend Serving (Serves Vite dist/ build if present)
