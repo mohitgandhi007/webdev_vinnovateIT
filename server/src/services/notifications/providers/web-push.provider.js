@@ -89,8 +89,8 @@ export class WebPushProvider {
     const notificationPayload = JSON.stringify({
       title: isTest ? 'PagePulse — Test Notification' : (title || 'PagePulse — Change detected'),
       body: summary,
-      icon: '/assets/icon-192.png',
-      badge: '/assets/badge-72.png',
+      icon: '/icon.svg',
+      badge: '/icon.svg',
       tag: isTest ? 'test-notification' : `pagepulse-${monitorId || 'change'}`,
       renotify: true,
       data: {

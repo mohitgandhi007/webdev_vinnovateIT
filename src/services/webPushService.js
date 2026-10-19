@@ -153,12 +153,18 @@ export const webPushService = {
     const applicationServerKey = urlBase64ToUint8Array(publicKey);
 
     let pushSubscription = await registration.pushManager.getSubscription();
-    if (!pushSubscription) {
-      pushSubscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey
-      });
+    if (pushSubscription) {
+      try {
+        await pushSubscription.unsubscribe();
+      } catch (unsubErr) {
+        console.warn('[WebPush] Notice unsubscribing previous subscription:', unsubErr);
+      }
     }
+
+    pushSubscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey
+    });
 
     const subJson = pushSubscription.toJSON();
 
@@ -257,6 +263,38 @@ export const webPushService = {
       id: stored?.id || null,
       endpoint
     });
+  },
+
+  /**
+   * Immediately display a desktop banner notification in macOS / Chrome
+   */
+  async showLocalNotification({ title, body, url = '/monitors', tag = 'pagepulse-change' } = {}) {
+    if (!this.isSupported() || Notification.permission !== 'granted') return false;
+    try {
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        if (reg && reg.showNotification) {
+          await reg.showNotification(title || 'PagePulse — Change detected', {
+            body: body || 'A change was detected on your monitored target.',
+            icon: '/icon.svg',
+            badge: '/icon.svg',
+            tag,
+            renotify: true,
+            data: { url }
+          });
+          return true;
+        }
+      }
+      new Notification(title || 'PagePulse — Change detected', {
+        body: body || 'A change was detected on your monitored target.',
+        icon: '/icon.svg',
+        tag
+      });
+      return true;
+    } catch (err) {
+      console.warn('[WebPush] Desktop notification notice:', err);
+      return false;
+    }
   },
 
   /**

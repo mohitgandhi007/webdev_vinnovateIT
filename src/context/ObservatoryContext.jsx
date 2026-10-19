@@ -27,8 +27,12 @@ export function ObservatoryProvider({ children }) {
   // Browser Push permission state ('default' | 'granted' | 'denied' | 'unsupported')
   const [pushPermission, setPushPermission] = useState(() => webPushService.getPermissionState());
 
-  const showToast = useCallback((message, type = 'success') => {
-    setToast({ message, type, id: Date.now() });
+  const showToast = useCallback((payload, type = 'success') => {
+    if (typeof payload === 'string') {
+      setToast({ message: payload, type, id: Date.now() });
+    } else if (payload && typeof payload === 'object') {
+      setToast({ ...payload, type: payload.type || type, id: Date.now() });
+    }
   }, []);
 
   const dismissToast = useCallback(() => {
@@ -115,7 +119,19 @@ export function ObservatoryProvider({ children }) {
           const res = await monitorService.triggerCheck(m.id, { wait: true });
           if (res?.hasChanged) {
             playAlertChime();
-            showToast(`⚡ Live Watch: Change detected on ${m.name}!`, 'warning');
+            webPushService.showLocalNotification({
+              title: `⚡ Change Detected: ${m.name}`,
+              body: `A change was detected on ${m.url}. Inspect diff telemetry.`,
+              url: `/compare/${m.id}?changeId=${res.changeId || ''}`,
+              tag: `pagepulse-${m.id}`
+            });
+            showToast({
+              title: `⚡ Change Detected: ${m.name}`,
+              message: res.summary || `Content alteration detected on ${m.url}.`,
+              type: 'warning',
+              actionUrl: `/compare/${m.id}?changeId=${res.changeId || ''}`,
+              actionLabel: 'Inspect Diff'
+            });
             await refresh(true);
           }
         } catch {}
@@ -313,7 +329,20 @@ export function ObservatoryProvider({ children }) {
 
       if (finalResult?.hasChanged) {
         playAlertChime();
-        showToast(`⚡ Change detected: ${finalResult.summary || 'Monitored content altered'}`, 'warning');
+        const targetMon = monitors.find(m => m.id === id);
+        webPushService.showLocalNotification({
+          title: `⚡ Change Detected: ${targetMon?.name || 'Monitored Target'}`,
+          body: finalResult.summary || 'Content alteration detected.',
+          url: `/compare/${id}`,
+          tag: `pagepulse-${id}`
+        });
+        showToast({
+          title: `⚡ Change Detected: ${targetMon?.name || 'Monitored Target'}`,
+          message: finalResult.summary || 'Content alteration detected on monitored target.',
+          type: 'warning',
+          actionUrl: `/compare/${id}`,
+          actionLabel: 'Inspect Diff'
+        });
       } else if (finalResult?.status === 'healthy') {
         showToast('✓ Check completed: Content steady, zero deviation.', 'success');
       } else if (finalResult?.status === 'degraded' || finalResult?.status === 'failing') {

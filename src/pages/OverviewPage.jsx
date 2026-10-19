@@ -20,6 +20,99 @@ export default function OverviewPage() {
   } = useObservatory();
   const isCheckingAny = Object.values(checkingMap || {}).some(Boolean);
 
+  // Dynamic 24-Hour Cadence & Detection Distribution calculated from real history
+  const cadenceData = React.useMemo(() => {
+    const now = Date.now();
+    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+    const NUM_SLOTS = 12; // 12 two-hour windows
+    const slotDuration = TWENTY_FOUR_HOURS / NUM_SLOTS;
+
+    // Filter real history to last 24h
+    const recentChanges = (history || []).filter(h => {
+      if (!h.detectedAt) return true;
+      const t = new Date(h.detectedAt).getTime();
+      return !isNaN(t) && (now - t) <= TWENTY_FOUR_HOURS;
+    });
+
+    const slots = Array.from({ length: NUM_SLOTS }, (_, i) => {
+      const slotStart = now - (NUM_SLOTS - i) * slotDuration;
+      const slotEnd = slotStart + slotDuration;
+
+      const count = recentChanges.filter(h => {
+        if (!h.detectedAt) return false;
+        const t = new Date(h.detectedAt).getTime();
+        return t >= slotStart && t < slotEnd;
+      }).length;
+
+      const dateObj = new Date(slotEnd);
+      const timeLabel = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+      return {
+        index: i,
+        timeLabel,
+        count
+      };
+    });
+
+    const maxCount = Math.max(...slots.map(s => s.count), 0);
+    const totalChanges = recentChanges.length;
+
+    // Generate SVG path coordinates: width 1000, height 220
+    const points = slots.map((s, i) => {
+      const x = Math.round((i / (NUM_SLOTS - 1)) * 1000);
+      let y = 195;
+      if (maxCount > 0) {
+        const ratio = s.count / maxCount;
+        y = Math.round(195 - ratio * 150);
+      } else {
+        // Subtle resting baseline when no shifts detected
+        y = Math.round(195 - Math.sin((i / (NUM_SLOTS - 1)) * Math.PI) * 12);
+      }
+      return { x, y, count: s.count, timeLabel: s.timeLabel };
+    });
+
+    // Build smooth cubic bezier curve
+    let pathD = `M 0 ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const mx = (p0.x + p1.x) / 2;
+      pathD += ` C ${mx} ${p0.y}, ${mx} ${p1.y}, ${p1.x} ${p1.y}`;
+    }
+
+    const areaD = `${pathD} L 1000 215 L 0 215 Z`;
+
+    // Find peak slot
+    let peak = points[0];
+    if (maxCount > 0) {
+      for (const p of points) {
+        if (p.count >= peak.count) peak = p;
+      }
+    } else {
+      peak = points[points.length - 1];
+    }
+
+    // 6 evenly spaced real time axis labels
+    const timeAxisLabels = [
+      new Date(now - 20 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(now - 16 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(now - 12 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(now - 8 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(now - 4 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      'Now'
+    ];
+
+    return {
+      points,
+      pathD,
+      areaD,
+      peak,
+      maxCount,
+      totalChanges,
+      timeAxisLabels
+    };
+  }, [history]);
+
   return (
     <div className="w-full px-margin-mobile md:px-margin-desktop py-space-lg flex flex-col gap-space-xl animate-in fade-in duration-200">
       {/* SECTION 1: THE WELCOME HEADER */}
@@ -460,33 +553,40 @@ export default function OverviewPage() {
             <line stroke="currentColor" className="text-sandstone" strokeWidth="1" x1="0" x2="1000" y1="210" y2="210" />
 
             <path
-              d="M 0 210 C 100 200, 180 180, 250 170 C 320 160, 380 120, 450 70 C 500 35, 540 25, 590 50 C 650 80, 720 140, 800 130 C 880 120, 940 90, 1000 115 L 1000 210 Z"
+              d={cadenceData.areaD}
               fill="url(#cadenceGradient)"
             />
             <path
-              d="M 0 210 C 100 200, 180 180, 250 170 C 320 160, 380 120, 450 70 C 500 35, 540 25, 590 50 C 650 80, 720 140, 800 130 C 880 120, 940 90, 1000 115"
+              d={cadenceData.pathD}
               fill="none"
               stroke="#747D52"
               strokeLinecap="round"
               strokeWidth="2.5"
             />
-            <circle cx="525" cy="30" fill="#747D52" r="4.5" stroke="#FFFEFA" strokeWidth="2" />
-            <g transform="translate(485, 0)">
-              <rect fill="#302A24" height="20" rx="3" width="80" x="0" y="0" />
-              <text fill="#F6F3EC" fontFamily="IBM Plex Mono" fontSize="10" textAnchor="middle" x="40" y="14">
-                10:00 · 8 diffs
+            
+            {/* Peak Activity Pin & Tooltip */}
+            <circle
+              cx={cadenceData.peak.x}
+              cy={cadenceData.peak.y}
+              fill="#747D52"
+              r="4.5"
+              stroke="#FFFEFA"
+              strokeWidth="2"
+            />
+            <g transform={`translate(${Math.min(Math.max(cadenceData.peak.x - 45, 10), 890)}, ${Math.max(cadenceData.peak.y - 30, 5)})`}>
+              <rect fill="#302A24" height="20" rx="3" width="90" x="0" y="0" />
+              <text fill="#F6F3EC" fontFamily="IBM Plex Mono" fontSize="10" textAnchor="middle" x="45" y="14">
+                {cadenceData.maxCount > 0 ? `${cadenceData.peak.timeLabel} · ${cadenceData.peak.count} diff${cadenceData.peak.count === 1 ? '' : 's'}` : 'Nominal · 0 diffs'}
               </text>
             </g>
           </svg>
 
           <div className="flex justify-between items-center pt-2 font-label-sm text-label-sm text-tertiary">
-            <span>00:00</span>
-            <span>04:00</span>
-            <span>08:00</span>
-            <span className="font-medium text-on-surface">12:00 UTC</span>
-            <span>16:00</span>
-            <span>20:00</span>
-            <span>Now</span>
+            {cadenceData.timeAxisLabels.map((lbl, idx) => (
+              <span key={idx} className={idx === cadenceData.timeAxisLabels.length - 1 ? 'font-medium text-on-surface' : ''}>
+                {lbl}
+              </span>
+            ))}
           </div>
         </div>
 
@@ -494,11 +594,13 @@ export default function OverviewPage() {
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-[18px]">insights</span>
             <span>
-              <strong className="font-medium text-on-surface">Pacing:</strong> 14 changes detected today, peaking around 10:00 UTC.
+              <strong className="font-medium text-on-surface">Pacing:</strong>{' '}
+              {cadenceData.totalChanges} {cadenceData.totalChanges === 1 ? 'change' : 'changes'} detected in the last 24h
+              {cadenceData.maxCount > 0 ? `, peaking around ${cadenceData.peak.timeLabel}.` : ' · all monitored targets nominal.'}
             </span>
           </div>
           <span className="font-label-sm text-label-sm text-tertiary hidden md:inline-block">
-            Frequency normal ±1.2σ
+            {cadenceData.maxCount > 0 ? 'Frequency dynamic ±1.2σ' : 'Baseline steady'}
           </span>
         </div>
       </section>
