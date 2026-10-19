@@ -5,7 +5,19 @@ import { useObservatory } from '../context/ObservatoryContext';
 
 export default function OverviewPage() {
   const navigate = useNavigate();
-  const { stats, history, monitors, triggerCheckAll, triggerCheckMonitor, checkingMap } = useObservatory();
+  const {
+    stats,
+    history,
+    monitors,
+    triggerCheckAll,
+    triggerCheckMonitor,
+    checkingMap,
+    isLiveWatch,
+    toggleLiveWatch,
+    liveWatchInterval,
+    pushPermission,
+    enablePushNotifications
+  } = useObservatory();
   const isCheckingAny = Object.values(checkingMap || {}).some(Boolean);
 
   return (
@@ -29,20 +41,40 @@ export default function OverviewPage() {
             </span>
           </p>
         </div>
-        <div className="self-start md:self-end flex items-center gap-space-sm">
+        <div className="self-start md:self-end flex flex-wrap items-center gap-space-sm">
           {monitors.length > 0 && (
-            <button
-              onClick={triggerCheckAll}
-              disabled={isCheckingAny}
-              className="flex items-center gap-space-xs px-space-md py-2.5 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm transition-colors border border-sandstone shadow-xs disabled:opacity-50"
-              type="button"
-              title="Immediately check all active targets for alterations"
-            >
-              <span className={`material-symbols-outlined text-[18px] ${isCheckingAny ? 'animate-spin text-primary' : 'text-primary'}`}>
-                refresh
-              </span>
-              <span>{isCheckingAny ? 'Checking...' : 'Pulse All'}</span>
-            </button>
+            <>
+              {/* Real-Time Live Watch Button */}
+              <button
+                onClick={() => toggleLiveWatch(15)}
+                className={`flex items-center gap-space-xs px-space-md py-2.5 rounded font-body-sm text-body-sm transition-all border shadow-xs ${
+                  isLiveWatch
+                    ? 'bg-secondary text-surface-container-lowest border-secondary font-medium animate-pulse'
+                    : 'bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-sandstone'
+                }`}
+                type="button"
+                title="Automatically watch targets in real time every 15s"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {isLiveWatch ? 'sensors' : 'sensors_off'}
+                </span>
+                <span>{isLiveWatch ? `Live Watch: ${liveWatchInterval}s` : 'Live Watch'}</span>
+              </button>
+
+              {/* Instant Pulse All Button */}
+              <button
+                onClick={triggerCheckAll}
+                disabled={isCheckingAny}
+                className="flex items-center gap-space-xs px-space-md py-2.5 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm transition-colors border border-sandstone shadow-xs disabled:opacity-50"
+                type="button"
+                title="Immediately check all active targets for alterations"
+              >
+                <span className={`material-symbols-outlined text-[18px] ${isCheckingAny ? 'animate-spin text-primary' : 'text-primary'}`}>
+                  refresh
+                </span>
+                <span>{isCheckingAny ? 'Checking...' : 'Pulse All'}</span>
+              </button>
+            </>
           )}
 
           <button
@@ -55,6 +87,33 @@ export default function OverviewPage() {
           </button>
         </div>
       </header>
+
+      {/* DESKTOP NOTIFICATIONS PERMISSION BANNER */}
+      {pushPermission !== 'granted' && pushPermission !== 'unsupported' && (
+        <div className="w-full p-3.5 rounded-lg bg-surface-container border border-sandstone/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-full bg-secondary/15 text-secondary flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-[20px]">notifications_active</span>
+            </span>
+            <div>
+              <p className="font-body-sm text-body-sm text-on-surface font-medium">
+                Instant Browser Push Notifications
+              </p>
+              <p className="font-body-xs text-xs text-on-surface-variant">
+                Receive real-time desktop banners the exact second a monitored website is updated.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={enablePushNotifications}
+            className="px-3.5 py-1.5 rounded bg-primary text-on-primary font-body-sm text-xs font-medium hover:bg-primary-container transition-colors shrink-0 shadow-xs flex items-center gap-1.5"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-[16px]">notifications</span>
+            <span>Enable Push Alerts</span>
+          </button>
+        </div>
+      )}
 
       {/* SECTION 2: THE MONITORING OVERVIEW (Continuous metric strip derived from real state) */}
       <section className="w-full bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden border border-sandstone">

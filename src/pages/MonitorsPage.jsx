@@ -16,6 +16,9 @@ export default function MonitorsPage() {
     deleteMonitor,
     triggerCheckMonitor,
     triggerCheckAll,
+    isLiveWatch,
+    toggleLiveWatch,
+    liveWatchInterval,
     checkingMap
   } = useObservatory();
   const isCheckingAny = Object.values(checkingMap || {}).some(Boolean);
@@ -291,20 +294,38 @@ export default function MonitorsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-space-sm shrink-0">
+        <div className="flex flex-wrap items-center gap-space-sm shrink-0">
           {monitors.length > 0 && (
-            <button
-              onClick={triggerCheckAll}
-              disabled={isCheckingAny}
-              className="inline-flex items-center gap-2 px-space-md py-2.5 rounded border border-sandstone bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm font-medium transition-all shadow-xs disabled:opacity-50"
-              type="button"
-              title="Immediately check all active targets for alterations"
-            >
-              <span className={`material-symbols-outlined text-[18px] ${isCheckingAny ? 'animate-spin text-primary' : 'text-primary'}`}>
-                refresh
-              </span>
-              <span>{isCheckingAny ? 'Checking...' : 'Pulse All'}</span>
-            </button>
+            <>
+              <button
+                onClick={() => toggleLiveWatch(15)}
+                className={`inline-flex items-center gap-2 px-space-md py-2.5 rounded font-body-sm text-body-sm font-medium transition-all border shadow-xs ${
+                  isLiveWatch
+                    ? 'bg-secondary text-surface-container-lowest border-secondary animate-pulse'
+                    : 'bg-surface-container-high hover:bg-surface-container-highest text-on-surface border-sandstone'
+                }`}
+                type="button"
+                title="Automatically inspect targets in real time every 15s"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {isLiveWatch ? 'sensors' : 'sensors_off'}
+                </span>
+                <span>{isLiveWatch ? `Live Watch: ${liveWatchInterval}s` : 'Live Watch'}</span>
+              </button>
+
+              <button
+                onClick={triggerCheckAll}
+                disabled={isCheckingAny}
+                className="inline-flex items-center gap-2 px-space-md py-2.5 rounded border border-sandstone bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm font-medium transition-all shadow-xs disabled:opacity-50"
+                type="button"
+                title="Immediately check all active targets for alterations"
+              >
+                <span className={`material-symbols-outlined text-[18px] ${isCheckingAny ? 'animate-spin text-primary' : 'text-primary'}`}>
+                  refresh
+                </span>
+                <span>{isCheckingAny ? 'Checking...' : 'Pulse All'}</span>
+              </button>
+            </>
           )}
           <button
             onClick={() => setIsNotificationModalOpen(true)}

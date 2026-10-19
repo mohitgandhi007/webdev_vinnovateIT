@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { monitorService } from '../services/monitorService';
 import { changeService } from '../services/changeService';
 import { insightService } from '../services/insightService';
 import { ApiError } from '../services/apiClient';
 import { storage } from '../services/storage';
+import { webPushService } from '../services/webPushService';
+import { playAlertChime } from '../utils/audioAlert';
 
 const ObservatoryContext = createContext();
 
@@ -16,6 +18,14 @@ export function ObservatoryProvider({ children }) {
   const [connectionError, setConnectionError] = useState(null);
   const [toast, setToast] = useState(null);
   const [checkingMap, setCheckingMap] = useState({});
+
+  // Real-time Live Watch mode state
+  const [isLiveWatch, setIsLiveWatch] = useState(false);
+  const [liveWatchInterval, setLiveWatchInterval] = useState(15); // seconds
+  const liveWatchTimerRef = useRef(null);
+
+  // Browser Push permission state ('default' | 'granted' | 'denied' | 'unsupported')
+  const [pushPermission, setPushPermission] = useState(() => webPushService.getPermissionState());
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -83,7 +93,42 @@ export function ObservatoryProvider({ children }) {
 
   useEffect(() => {
     refresh();
+    webPushService.autoSyncIfGranted();
   }, [refresh]);
+
+  // High-frequency Live Watch monitoring loop
+  useEffect(() => {
+    if (!isLiveWatch) {
+      if (liveWatchTimerRef.current) {
+        clearInterval(liveWatchTimerRef.current);
+        liveWatchTimerRef.current = null;
+      }
+      return;
+    }
+
+    liveWatchTimerRef.current = setInterval(async () => {
+      const activeTargets = monitors.filter(m => m.isActive);
+      if (activeTargets.length === 0) return;
+
+      for (const m of activeTargets) {
+        try {
+          const res = await monitorService.triggerCheck(m.id, { wait: true });
+          if (res?.hasChanged) {
+            playAlertChime();
+            showToast(`⚡ Live Watch: Change detected on ${m.name}!`, 'warning');
+            await refresh(true);
+          }
+        } catch {}
+      }
+    }, liveWatchInterval * 1000);
+
+    return () => {
+      if (liveWatchTimerRef.current) {
+        clearInterval(liveWatchTimerRef.current);
+        liveWatchTimerRef.current = null;
+      }
+    };
+  }, [isLiveWatch, liveWatchInterval, monitors, refresh, showToast]);
 
   // Actions
   const addMonitor = useCallback(async (payload) => {
@@ -267,6 +312,7 @@ export function ObservatoryProvider({ children }) {
       setCheckingMap(prev => ({ ...prev, [id]: false }));
 
       if (finalResult?.hasChanged) {
+        playAlertChime();
         showToast(`⚡ Change detected: ${finalResult.summary || 'Monitored content altered'}`, 'warning');
       } else if (finalResult?.status === 'healthy') {
         showToast('✓ Check completed: Content steady, zero deviation.', 'success');
@@ -298,9 +344,13 @@ export function ObservatoryProvider({ children }) {
     });
 
     try {
-      await Promise.allSettled(
+      const results = await Promise.allSettled(
         activeMonitors.map(m => monitorService.triggerCheck(m.id, { wait: true }))
       );
+      const hasAnyChanged = results.some(r => r.status === 'fulfilled' && r.value?.hasChanged);
+      if (hasAnyChanged) {
+        playAlertChime();
+      }
       await refresh(true);
       showToast(`Pulse completed across ${activeMonitors.length} targets.`, 'success');
     } catch (err) {
@@ -312,6 +362,30 @@ export function ObservatoryProvider({ children }) {
       });
     }
   }, [monitors, refresh, showToast]);
+
+  const toggleLiveWatch = useCallback((intervalSec = 15) => {
+    setIsLiveWatch(prev => {
+      const next = !prev;
+      if (next) {
+        setLiveWatchInterval(intervalSec);
+        showToast(`⚡ Live Watch active: Inspecting targets every ${intervalSec}s.`, 'info');
+      } else {
+        showToast('Live Watch paused.', 'info');
+      }
+      return next;
+    });
+  }, [showToast]);
+
+  const enablePushNotifications = useCallback(async () => {
+    try {
+      await webPushService.subscribe();
+      setPushPermission(webPushService.getPermissionState());
+      showToast('✓ Browser notifications enabled! Instant desktop alerts active.', 'success');
+    } catch (err) {
+      setPushPermission(webPushService.getPermissionState());
+      showToast(err.message || 'Could not enable browser notifications', 'error');
+    }
+  }, [showToast]);
 
   const toggleChangeReview = useCallback(async (targetId) => {
     const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -423,6 +497,11 @@ export function ObservatoryProvider({ children }) {
         deleteMonitor,
         triggerCheckMonitor,
         triggerCheckAll,
+        isLiveWatch,
+        liveWatchInterval,
+        toggleLiveWatch,
+        pushPermission,
+        enablePushNotifications,
         toggleChangeReview,
         showToast,
         dismissToast

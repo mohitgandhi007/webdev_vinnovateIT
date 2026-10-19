@@ -46,21 +46,20 @@ export class NotificationDispatcher {
     const workspaceId = monitor.workspace_id;
     const destinations = await destinationRepository.findByWorkspaceId(workspaceId, { is_active: true });
 
-    if (destinations.length === 0) return [];
-
     const results = [];
 
-    const event = {
-      type: 'change',
-      hasChanged: true,
-      importance: insight?.importance || 'medium',
-      previousText: baselineSnapshot?.text_content || '',
-      currentText: currentSnapshot?.text_content || '',
-      changeRecord,
-      monitor
-    };
+    if (destinations.length > 0) {
+      const event = {
+        type: 'change',
+        hasChanged: true,
+        importance: insight?.importance || 'medium',
+        previousText: baselineSnapshot?.text_content || '',
+        currentText: currentSnapshot?.text_content || '',
+        changeRecord,
+        monitor
+      };
 
-    for (const destination of destinations) {
+      for (const destination of destinations) {
       try {
         const evaluation = NotificationRuleEvaluator.evaluate(destination, event);
 
@@ -119,6 +118,7 @@ export class NotificationDispatcher {
         });
       }
     }
+  }
 
     // Dispatch to registered browser Web Push subscriptions
     try {

@@ -257,5 +257,18 @@ export const webPushService = {
       id: stored?.id || null,
       endpoint
     });
+  },
+
+  /**
+   * If permission is already granted in the browser, ensure active registration with backend
+   */
+  async autoSyncIfGranted() {
+    if (!this.isSupported()) return;
+    if (Notification.permission !== 'granted') return;
+    try {
+      await this.subscribe();
+    } catch (err) {
+      console.warn('[WebPush] Auto-sync notice:', err?.message);
+    }
   }
 };
