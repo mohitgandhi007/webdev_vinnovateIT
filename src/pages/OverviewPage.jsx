@@ -19,6 +19,7 @@ export default function OverviewPage() {
     enablePushNotifications
   } = useObservatory();
   const isCheckingAny = Object.values(checkingMap || {}).some(Boolean);
+  const [hoveredSlotIndex, setHoveredSlotIndex] = React.useState(null);
 
   // Dynamic 24-Hour Cadence & Detection Distribution calculated from real history
   const cadenceData = React.useMemo(() => {
@@ -38,19 +39,23 @@ export default function OverviewPage() {
       const slotStart = now - (NUM_SLOTS - i) * slotDuration;
       const slotEnd = slotStart + slotDuration;
 
-      const count = recentChanges.filter(h => {
+      const matchedChanges = recentChanges.filter(h => {
         if (!h.detectedAt) return false;
         const t = new Date(h.detectedAt).getTime();
         return t >= slotStart && t < slotEnd;
-      }).length;
+      });
+      const count = matchedChanges.length;
 
-      const dateObj = new Date(slotEnd);
-      const timeLabel = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const slotStartLabel = new Date(slotStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const slotEndLabel = new Date(slotEnd).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const fullLabel = `${slotStartLabel} – ${slotEndLabel}`;
 
       return {
         index: i,
-        timeLabel,
-        count
+        timeLabel: slotEndLabel,
+        fullLabel,
+        count,
+        changes: matchedChanges
       };
     });
 
@@ -68,7 +73,7 @@ export default function OverviewPage() {
         // Subtle resting baseline when no shifts detected
         y = Math.round(195 - Math.sin((i / (NUM_SLOTS - 1)) * Math.PI) * 12);
       }
-      return { x, y, count: s.count, timeLabel: s.timeLabel };
+      return { x, y, count: s.count, timeLabel: s.timeLabel, fullLabel: s.fullLabel, changes: s.changes, index: i };
     });
 
     // Build smooth cubic bezier curve
@@ -533,74 +538,210 @@ export default function OverviewPage() {
           <span className="font-label-sm text-label-sm text-tertiary">Cycle: 15m Automated Pulse</span>
         </div>
 
-        {/* Compact Frequency Curve SVG Chart */}
-        <div className="w-full relative pt-2">
-          <svg
-            aria-label="Monitoring Cadence 24 Hour Curve"
-            className="w-full h-44 overflow-visible"
-            preserveAspectRatio="none"
-            viewBox="0 0 1000 220"
-          >
-            <defs>
-              <linearGradient id="cadenceGradient" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#747D52" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#747D52" stopOpacity="0.0" />
-              </linearGradient>
-            </defs>
-            <line stroke="currentColor" className="text-sandstone" strokeDasharray="3 4" strokeWidth="1" x1="0" x2="1000" y1="40" y2="40" />
-            <line stroke="currentColor" className="text-sandstone" strokeDasharray="3 4" strokeWidth="1" x1="0" x2="1000" y1="100" y2="100" />
-            <line stroke="currentColor" className="text-sandstone" strokeDasharray="3 4" strokeWidth="1" x1="0" x2="1000" y1="160" y2="160" />
-            <line stroke="currentColor" className="text-sandstone" strokeWidth="1" x1="0" x2="1000" y1="210" y2="210" />
+        {/* Interactive Frequency Curve SVG Chart */}
+        {(() => {
+          const isHovering = hoveredSlotIndex !== null && cadenceData.points[hoveredSlotIndex];
+          const activePoint = isHovering ? cadenceData.points[hoveredSlotIndex] : cadenceData.peak;
 
-            <path
-              d={cadenceData.areaD}
-              fill="url(#cadenceGradient)"
-            />
-            <path
-              d={cadenceData.pathD}
-              fill="none"
-              stroke="#747D52"
-              strokeLinecap="round"
-              strokeWidth="2.5"
-            />
-            
-            {/* Peak Activity Pin & Tooltip */}
-            <circle
-              cx={cadenceData.peak.x}
-              cy={cadenceData.peak.y}
-              fill="#747D52"
-              r="4.5"
-              stroke="#FFFEFA"
-              strokeWidth="2"
-            />
-            <g transform={`translate(${Math.min(Math.max(cadenceData.peak.x - 45, 10), 890)}, ${Math.max(cadenceData.peak.y - 30, 5)})`}>
-              <rect fill="#302A24" height="20" rx="3" width="90" x="0" y="0" />
-              <text fill="#F6F3EC" fontFamily="IBM Plex Mono" fontSize="10" textAnchor="middle" x="45" y="14">
-                {cadenceData.maxCount > 0 ? `${cadenceData.peak.timeLabel} · ${cadenceData.peak.count} diff${cadenceData.peak.count === 1 ? '' : 's'}` : 'Nominal · 0 diffs'}
-              </text>
-            </g>
-          </svg>
+          const handleChartMouseMove = (e) => {
+            const svg = e.currentTarget;
+            const rect = svg.getBoundingClientRect();
+            const clientX = e.clientX - rect.left;
+            const pct = Math.max(0, Math.min(1, clientX / rect.width));
+            const slotIdx = Math.round(pct * (cadenceData.points.length - 1));
+            setHoveredSlotIndex(slotIdx);
+          };
 
-          <div className="flex justify-between items-center pt-2 font-label-sm text-label-sm text-tertiary">
-            {cadenceData.timeAxisLabels.map((lbl, idx) => (
-              <span key={idx} className={idx === cadenceData.timeAxisLabels.length - 1 ? 'font-medium text-on-surface' : ''}>
-                {lbl}
-              </span>
-            ))}
-          </div>
-        </div>
+          const handleChartMouseLeave = () => {
+            setHoveredSlotIndex(null);
+          };
+
+          const tooltipX = Math.min(Math.max(activePoint.x - 65, 10), 860);
+          const tooltipY = Math.max(activePoint.y - 52, 8);
+
+          return (
+            <div className="w-full relative pt-2">
+              <svg
+                aria-label="Interactive Monitoring Cadence 24 Hour Curve"
+                className="w-full h-44 overflow-visible cursor-crosshair select-none"
+                preserveAspectRatio="none"
+                viewBox="0 0 1000 220"
+                onMouseMove={handleChartMouseMove}
+                onMouseLeave={handleChartMouseLeave}
+              >
+                <defs>
+                  <linearGradient id="cadenceGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#747D52" stopOpacity="0.25" />
+                    <stop offset="100%" stopColor="#747D52" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Background grid guidelines */}
+                <line stroke="currentColor" className="text-sandstone" strokeDasharray="3 4" strokeWidth="1" x1="0" x2="1000" y1="40" y2="40" />
+                <line stroke="currentColor" className="text-sandstone" strokeDasharray="3 4" strokeWidth="1" x1="0" x2="1000" y1="100" y2="100" />
+                <line stroke="currentColor" className="text-sandstone" strokeDasharray="3 4" strokeWidth="1" x1="0" x2="1000" y1="160" y2="160" />
+                <line stroke="currentColor" className="text-sandstone" strokeWidth="1" x1="0" x2="1000" y1="210" y2="210" />
+
+                {/* Shaded Area and Curve */}
+                <path
+                  d={cadenceData.areaD}
+                  fill="url(#cadenceGradient)"
+                />
+                <path
+                  d={cadenceData.pathD}
+                  fill="none"
+                  stroke="#747D52"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                />
+
+                {/* Vertical Tracker Crosshair Line */}
+                <line
+                  x1={activePoint.x}
+                  x2={activePoint.x}
+                  y1={20}
+                  y2={210}
+                  stroke="#747D52"
+                  strokeWidth="1.5"
+                  strokeDasharray="3 3"
+                  opacity={isHovering ? 0.75 : 0.25}
+                  className="transition-all duration-100 ease-out"
+                />
+
+                {/* All Interval Dots along Curve */}
+                {cadenceData.points.map((pt, idx) => {
+                  const isThisActive = activePoint.x === pt.x;
+                  return (
+                    <circle
+                      key={idx}
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={isThisActive ? 5 : (pt.count > 0 ? 3.5 : 2)}
+                      fill={isThisActive ? '#747D52' : (pt.count > 0 ? '#747D52' : '#C1B9A9')}
+                      stroke={isThisActive ? '#FFFEFA' : 'none'}
+                      strokeWidth={isThisActive ? 2 : 0}
+                      opacity={isThisActive ? 1 : (pt.count > 0 ? 0.75 : 0.35)}
+                      className="transition-all duration-150"
+                    />
+                  );
+                })}
+
+                {/* Active Tracking Halo */}
+                <circle
+                  cx={activePoint.x}
+                  cy={activePoint.y}
+                  fill="#747D52"
+                  opacity="0.25"
+                  r="10"
+                  className="animate-pulse"
+                />
+                <circle
+                  cx={activePoint.x}
+                  cy={activePoint.y}
+                  fill="#747D52"
+                  r="5"
+                  stroke="#FFFEFA"
+                  strokeWidth="2.5"
+                />
+
+                {/* Interactive Tooltip Card */}
+                <g
+                  transform={`translate(${tooltipX}, ${tooltipY})`}
+                  className="pointer-events-none transition-transform duration-100 ease-out"
+                >
+                  <rect
+                    fill="#241E18"
+                    height="44"
+                    rx="6"
+                    width="130"
+                    x="0"
+                    y="0"
+                    stroke="#747D52"
+                    strokeWidth="1.2"
+                    opacity="0.97"
+                  />
+                  <text
+                    fill="#C5BEB3"
+                    fontFamily="IBM Plex Mono"
+                    fontSize="9.5"
+                    textAnchor="middle"
+                    x="65"
+                    y="17"
+                  >
+                    {activePoint.fullLabel || activePoint.timeLabel}
+                  </text>
+                  <text
+                    fill="#FFFEFA"
+                    fontFamily="IBM Plex Mono"
+                    fontSize="11.5"
+                    fontWeight="600"
+                    textAnchor="middle"
+                    x="65"
+                    y="34"
+                  >
+                    {activePoint.count > 0
+                      ? `${activePoint.count} ${activePoint.count === 1 ? 'diff detected' : 'diffs detected'}`
+                      : '0 diffs · steady'}
+                  </text>
+                </g>
+
+                {/* Transparent Overlay for smooth drag & hover across entire canvas */}
+                <rect
+                  x="0"
+                  y="0"
+                  width="1000"
+                  height="220"
+                  fill="transparent"
+                  className="cursor-crosshair"
+                />
+              </svg>
+
+              <div className="flex justify-between items-center pt-2 font-label-sm text-label-sm text-tertiary">
+                {cadenceData.timeAxisLabels.map((lbl, idx) => (
+                  <span
+                    key={idx}
+                    className={
+                      idx === cadenceData.timeAxisLabels.length - 1
+                        ? 'font-medium text-on-surface'
+                        : ''
+                    }
+                  >
+                    {lbl}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="pt-space-xs flex items-center justify-between border-t border-sandstone/40 text-on-surface-variant font-body-sm text-body-sm">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[18px]">insights</span>
+            <span className="material-symbols-outlined text-primary text-[18px]">
+              {hoveredSlotIndex !== null ? 'touch_app' : 'insights'}
+            </span>
             <span>
-              <strong className="font-medium text-on-surface">Pacing:</strong>{' '}
-              {cadenceData.totalChanges} {cadenceData.totalChanges === 1 ? 'change' : 'changes'} detected in the last 24h
-              {cadenceData.maxCount > 0 ? `, peaking around ${cadenceData.peak.timeLabel}.` : ' · all monitored targets nominal.'}
+              {hoveredSlotIndex !== null && cadenceData.points[hoveredSlotIndex] ? (
+                <>
+                  <strong className="font-medium text-on-surface">
+                    Inspecting {cadenceData.points[hoveredSlotIndex].fullLabel}:
+                  </strong>{' '}
+                  {cadenceData.points[hoveredSlotIndex].count > 0
+                    ? `${cadenceData.points[hoveredSlotIndex].count} ${
+                        cadenceData.points[hoveredSlotIndex].count === 1 ? 'change' : 'changes'
+                      } detected in this window.`
+                    : 'Zero alterations recorded · baseline steady.'}
+                </>
+              ) : (
+                <>
+                  <strong className="font-medium text-on-surface">Pacing:</strong>{' '}
+                  {cadenceData.totalChanges} {cadenceData.totalChanges === 1 ? 'change' : 'changes'} detected in the last 24h
+                  {cadenceData.maxCount > 0 ? `, peaking around ${cadenceData.peak.timeLabel}.` : ' · all monitored targets nominal.'}
+                </>
+              )}
             </span>
           </div>
           <span className="font-label-sm text-label-sm text-tertiary hidden md:inline-block">
-            {cadenceData.maxCount > 0 ? 'Frequency dynamic ±1.2σ' : 'Baseline steady'}
+            {hoveredSlotIndex !== null ? 'Hover across graph to explore' : (cadenceData.maxCount > 0 ? 'Frequency dynamic ±1.2σ' : 'Baseline steady')}
           </span>
         </div>
       </section>
