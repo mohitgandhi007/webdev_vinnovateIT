@@ -35,8 +35,13 @@ export default function OverviewPage() {
       return !isNaN(t) && (now - t) <= TWENTY_FOUR_HOURS;
     });
 
+    // Align slots to rounded hour boundaries
+    const currentHourFloor = new Date(now);
+    currentHourFloor.setMinutes(0, 0, 0);
+    const baseEpoch = currentHourFloor.getTime() + 3600 * 1000;
+
     const slots = Array.from({ length: NUM_SLOTS }, (_, i) => {
-      const slotStart = now - (NUM_SLOTS - i) * slotDuration;
+      const slotStart = baseEpoch - (NUM_SLOTS - i) * slotDuration;
       const slotEnd = slotStart + slotDuration;
 
       const matchedChanges = recentChanges.filter(h => {
@@ -48,11 +53,11 @@ export default function OverviewPage() {
 
       const slotStartLabel = new Date(slotStart).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
       const slotEndLabel = new Date(slotEnd).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      const fullLabel = `${slotStartLabel} – ${slotEndLabel}`;
+      const fullLabel = i === NUM_SLOTS - 1 ? `${slotStartLabel} – Now` : `${slotStartLabel} – ${slotEndLabel}`;
 
       return {
         index: i,
-        timeLabel: slotEndLabel,
+        timeLabel: i === NUM_SLOTS - 1 ? 'Now' : slotEndLabel,
         fullLabel,
         count,
         changes: matchedChanges
@@ -97,13 +102,13 @@ export default function OverviewPage() {
       peak = points[points.length - 1];
     }
 
-    // 6 evenly spaced real time axis labels
+    // 6 evenly spaced clean hour time axis labels
     const timeAxisLabels = [
-      new Date(now - 20 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-      new Date(now - 16 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-      new Date(now - 12 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-      new Date(now - 8 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-      new Date(now - 4 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(baseEpoch - 20 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(baseEpoch - 16 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(baseEpoch - 12 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(baseEpoch - 8 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+      new Date(baseEpoch - 4 * 3600 * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
       'Now'
     ];
 
@@ -556,11 +561,41 @@ export default function OverviewPage() {
             setHoveredSlotIndex(null);
           };
 
-          const tooltipX = Math.min(Math.max(activePoint.x - 65, 10), 860);
-          const tooltipY = Math.max(activePoint.y - 52, 8);
+          const pctX = Math.min(Math.max((activePoint.x / 1000) * 100, 10), 90);
+          const pctY = Math.min(Math.max((activePoint.y / 220) * 100, 15), 90);
 
           return (
             <div className="w-full relative pt-2">
+              {/* Native HTML Floating Tooltip — Never distorted by SVG coordinate stretching */}
+              <div
+                className="absolute pointer-events-none transition-all duration-150 ease-out z-20"
+                style={{
+                  left: `${pctX}%`,
+                  top: `${pctY}%`,
+                  transform: 'translate(-50%, -125%)'
+                }}
+              >
+                <div className="bg-[#241E18]/95 text-sandstone px-3.5 py-1.5 rounded-md shadow-2xl border border-sandstone/30 backdrop-blur-md flex flex-col items-center gap-0.5 whitespace-nowrap min-w-[120px]">
+                  <span className="font-mono text-[10.5px] text-[#C5BEB3] font-medium tracking-wide">
+                    {activePoint.fullLabel || activePoint.timeLabel}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        activePoint.count > 0 ? 'bg-amber-400' : 'bg-primary'
+                      }`}
+                    />
+                    <span className="font-mono text-xs font-semibold text-white tracking-tight">
+                      {activePoint.count > 0
+                        ? `${activePoint.count} ${activePoint.count === 1 ? 'diff detected' : 'diffs detected'}`
+                        : '0 diffs · steady'}
+                    </span>
+                  </div>
+                  {/* Downward indicator arrow */}
+                  <div className="w-2 h-2 bg-[#241E18] border-r border-b border-sandstone/30 rotate-45 -mb-2 mt-0.5" />
+                </div>
+              </div>
+
               <svg
                 aria-label="Interactive Monitoring Cadence 24 Hour Curve"
                 className="w-full h-44 overflow-visible cursor-crosshair select-none"
@@ -644,47 +679,6 @@ export default function OverviewPage() {
                   strokeWidth="2.5"
                 />
 
-                {/* Interactive Tooltip Card */}
-                <g
-                  transform={`translate(${tooltipX}, ${tooltipY})`}
-                  className="pointer-events-none transition-transform duration-100 ease-out"
-                >
-                  <rect
-                    fill="#241E18"
-                    height="44"
-                    rx="6"
-                    width="130"
-                    x="0"
-                    y="0"
-                    stroke="#747D52"
-                    strokeWidth="1.2"
-                    opacity="0.97"
-                  />
-                  <text
-                    fill="#C5BEB3"
-                    fontFamily="IBM Plex Mono"
-                    fontSize="9.5"
-                    textAnchor="middle"
-                    x="65"
-                    y="17"
-                  >
-                    {activePoint.fullLabel || activePoint.timeLabel}
-                  </text>
-                  <text
-                    fill="#FFFEFA"
-                    fontFamily="IBM Plex Mono"
-                    fontSize="11.5"
-                    fontWeight="600"
-                    textAnchor="middle"
-                    x="65"
-                    y="34"
-                  >
-                    {activePoint.count > 0
-                      ? `${activePoint.count} ${activePoint.count === 1 ? 'diff detected' : 'diffs detected'}`
-                      : '0 diffs · steady'}
-                  </text>
-                </g>
-
                 {/* Transparent Overlay for smooth drag & hover across entire canvas */}
                 <rect
                   x="0"
@@ -696,7 +690,7 @@ export default function OverviewPage() {
                 />
               </svg>
 
-              <div className="flex justify-between items-center pt-2 font-label-sm text-label-sm text-tertiary">
+              <div className="flex justify-between items-center pt-2 font-mono text-[11px] text-tertiary">
                 {cadenceData.timeAxisLabels.map((lbl, idx) => (
                   <span
                     key={idx}
