@@ -141,8 +141,8 @@ export const monitorService = {
     return true;
   },
 
-  async triggerCheck(id) {
-    const res = await monitorsApi.triggerCheck(id);
+  async triggerCheck(id, options = { wait: true }) {
+    const res = await monitorsApi.triggerCheck(id, options);
     return res?.data;
   },
 

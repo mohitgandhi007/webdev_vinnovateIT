@@ -187,12 +187,20 @@ export const pageFetcher = {
           }
         });
 
+        // Prevent caching from returning stale responses on active targets
+        await page.setExtraHTTPHeaders({
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }).catch(() => {});
+
         let response = null;
         try {
           response = await page.goto(url, {
             waitUntil: 'domcontentloaded',
             timeout: navigationTimeoutMs
           });
+          // Allow client-side frameworks to complete hydration
+          await page.waitForLoadState('load', { timeout: 4000 }).catch(() => {});
         } catch (navErr) {
           const errMsg = navErr.message || '';
 
@@ -301,8 +309,8 @@ export const pageFetcher = {
             });
           }
         } else {
-          // Bounded settling pause for client-side JavaScript hydration (500ms max)
-          await page.waitForTimeout(500);
+          // Bounded settling pause for client-side JavaScript hydration (600ms)
+          await page.waitForTimeout(600);
         }
 
         // Extract raw text with user-configured ignored selectors stripped out
@@ -318,18 +326,24 @@ export const pageFetcher = {
             ({ selector, ignored }) => {
               const el = document.querySelector(selector);
               if (!el) return '';
-              const clone = el.cloneNode(true);
-              const removals = clone.querySelectorAll('script, style, noscript, svg');
-              removals.forEach(n => n.remove());
-
+              const elementsToHide = [];
+              el.querySelectorAll('script, style, noscript, svg').forEach(node => {
+                elementsToHide.push({ node, orig: node.style.display });
+                node.style.display = 'none';
+              });
               for (const ignSel of ignored) {
                 try {
-                  const ignoredNodes = clone.querySelectorAll(ignSel);
-                  ignoredNodes.forEach(n => n.remove());
+                  el.querySelectorAll(ignSel).forEach(node => {
+                    elementsToHide.push({ node, orig: node.style.display });
+                    node.style.display = 'none';
+                  });
                 } catch {}
               }
-
-              return clone.innerText || clone.textContent || '';
+              const text = el.innerText || el.textContent || '';
+              elementsToHide.forEach(({ node, orig }) => {
+                node.style.display = orig;
+              });
+              return text;
             },
             { selector: cssSelector, ignored: ignoredList }
           );
@@ -337,18 +351,24 @@ export const pageFetcher = {
           rawText = await page.evaluate(
             ({ ignored }) => {
               if (!document.body) return '';
-              const clone = document.body.cloneNode(true);
-              const removals = clone.querySelectorAll('script, style, noscript, svg');
-              removals.forEach(n => n.remove());
-
+              const elementsToHide = [];
+              document.querySelectorAll('script, style, noscript, svg').forEach(node => {
+                elementsToHide.push({ node, orig: node.style.display });
+                node.style.display = 'none';
+              });
               for (const ignSel of ignored) {
                 try {
-                  const ignoredNodes = clone.querySelectorAll(ignSel);
-                  ignoredNodes.forEach(n => n.remove());
+                  document.querySelectorAll(ignSel).forEach(node => {
+                    elementsToHide.push({ node, orig: node.style.display });
+                    node.style.display = 'none';
+                  });
                 } catch {}
               }
-
-              return clone.innerText || clone.textContent || '';
+              const text = document.body.innerText || document.body.textContent || '';
+              elementsToHide.forEach(({ node, orig }) => {
+                node.style.display = orig;
+              });
+              return text;
             },
             { ignored: ignoredList }
           );

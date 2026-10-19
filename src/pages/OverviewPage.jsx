@@ -5,7 +5,8 @@ import { useObservatory } from '../context/ObservatoryContext';
 
 export default function OverviewPage() {
   const navigate = useNavigate();
-  const { stats, history, monitors } = useObservatory();
+  const { stats, history, monitors, triggerCheckAll, triggerCheckMonitor, checkingMap } = useObservatory();
+  const isCheckingAny = Object.values(checkingMap || {}).some(Boolean);
 
   return (
     <div className="w-full px-margin-mobile md:px-margin-desktop py-space-lg flex flex-col gap-space-xl animate-in fade-in duration-200">
@@ -28,7 +29,22 @@ export default function OverviewPage() {
             </span>
           </p>
         </div>
-        <div className="self-start md:self-end">
+        <div className="self-start md:self-end flex items-center gap-space-sm">
+          {monitors.length > 0 && (
+            <button
+              onClick={triggerCheckAll}
+              disabled={isCheckingAny}
+              className="flex items-center gap-space-xs px-space-md py-2.5 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm transition-colors border border-sandstone shadow-xs disabled:opacity-50"
+              type="button"
+              title="Immediately check all active targets for alterations"
+            >
+              <span className={`material-symbols-outlined text-[18px] ${isCheckingAny ? 'animate-spin text-primary' : 'text-primary'}`}>
+                refresh
+              </span>
+              <span>{isCheckingAny ? 'Checking...' : 'Pulse All'}</span>
+            </button>
+          )}
+
           <button
             onClick={() => navigate('/monitors?action=add')}
             className="flex items-center gap-space-xs px-space-md py-2.5 rounded bg-primary hover:bg-primary-container text-on-primary font-body-sm text-body-sm transition-colors shadow-sm"
@@ -258,8 +274,19 @@ export default function OverviewPage() {
                     </div>
                     <div className="pt-4 flex items-center gap-3">
                       <button
+                        onClick={() => latestMonitor && triggerCheckMonitor(latestMonitor.id)}
+                        disabled={!latestMonitor || checkingMap[latestMonitor.id]}
+                        className="px-3.5 py-2.5 rounded bg-surface-container text-on-surface font-body-sm text-body-sm hover:bg-surface-container-high transition-colors border border-sandstone flex items-center gap-1.5 disabled:opacity-50"
+                        title="Check this target now"
+                        type="button"
+                      >
+                        <span className={`material-symbols-outlined text-[16px] ${latestMonitor && checkingMap[latestMonitor.id] ? 'animate-spin text-primary' : ''}`}>refresh</span>
+                        <span>{latestMonitor && checkingMap[latestMonitor.id] ? 'Checking...' : 'Check Now'}</span>
+                      </button>
+                      <button
                         onClick={() => navigate('/monitors')}
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded bg-primary text-on-primary font-body-sm text-body-sm hover:bg-primary-container transition-colors shadow-sm"
+                        type="button"
                       >
                         <span>Manage Monitors</span>
                         <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -267,6 +294,7 @@ export default function OverviewPage() {
                       <button
                         onClick={() => navigate('/history')}
                         className="px-4 py-2.5 rounded bg-surface-container text-on-surface font-body-sm text-body-sm hover:bg-surface-container-high transition-colors border border-sandstone flex items-center gap-1.5"
+                        type="button"
                       >
                         <span>Journal</span>
                       </button>

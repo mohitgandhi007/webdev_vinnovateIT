@@ -125,7 +125,8 @@ export function ObservatoryProvider({ children }) {
     try {
       const created = await monitorService.create(payload);
       await refresh(true);
-      showToast(`Monitor '${created.name}' registered successfully.`);
+      showToast(`Monitor '${created.name}' registered. Capturing initial baseline...`, 'info');
+      triggerCheckMonitor(created.id).catch(() => {});
       return created;
     } catch (err) {
       const msg = err instanceof ApiError ? err.userMessage : (err.message || 'Failed to add monitor');
@@ -215,7 +216,7 @@ export function ObservatoryProvider({ children }) {
 
   const triggerCheckMonitor = useCallback(async (id) => {
     setCheckingMap(prev => ({ ...prev, [id]: true }));
-    showToast('Check initiated. Analyzing page content...', 'info');
+    showToast('Check initiated. Inspecting target content...', 'info');
 
     if (isDemoMode) {
       setTimeout(() => {
@@ -240,12 +241,42 @@ export function ObservatoryProvider({ children }) {
     }
 
     try {
-      const result = await monitorService.triggerCheck(id);
-      setTimeout(async () => {
-        await refresh(true);
-        setCheckingMap(prev => ({ ...prev, [id]: false }));
-      }, 2500);
-      return result;
+      // 1. Request on-demand check with wait: true so backend awaits execution
+      const result = await monitorService.triggerCheck(id, { wait: true });
+      let finalResult = result;
+
+      // 2. If check was queued asynchronously, poll until complete
+      if (finalResult?.status === 'checking' || finalResult?.status === 'running') {
+        let attempts = 0;
+        while (attempts < 25) {
+          await new Promise(r => setTimeout(r, 1200));
+          attempts++;
+          const fresh = await monitorService.getById(id).catch(() => null);
+          if (fresh && !fresh.isChecking && fresh.status !== 'checking') {
+            finalResult = {
+              status: fresh.status,
+              hasChanged: fresh.status === 'degraded' || Boolean(fresh.lastChangeSummary),
+              summary: fresh.lastChangeSummary
+            };
+            break;
+          }
+        }
+      }
+
+      await refresh(true);
+      setCheckingMap(prev => ({ ...prev, [id]: false }));
+
+      if (finalResult?.hasChanged) {
+        showToast(`⚡ Change detected: ${finalResult.summary || 'Monitored content altered'}`, 'warning');
+      } else if (finalResult?.status === 'healthy') {
+        showToast('✓ Check completed: Content steady, zero deviation.', 'success');
+      } else if (finalResult?.status === 'degraded' || finalResult?.status === 'failing') {
+        showToast(`Check finished with status: ${finalResult.status}`, 'warning');
+      } else {
+        showToast('Check completed successfully.', 'info');
+      }
+
+      return finalResult;
     } catch (err) {
       setCheckingMap(prev => ({ ...prev, [id]: false }));
       const msg = err instanceof ApiError ? err.userMessage : (err.message || 'Failed to trigger check');
@@ -253,6 +284,34 @@ export function ObservatoryProvider({ children }) {
       throw err;
     }
   }, [isDemoMode, monitors, refresh, showToast]);
+
+  const triggerCheckAll = useCallback(async () => {
+    const activeMonitors = monitors.filter(m => m.isActive);
+    if (activeMonitors.length === 0) {
+      showToast('No active monitors found to check.', 'info');
+      return;
+    }
+
+    showToast(`Pulsing all ${activeMonitors.length} active monitors...`, 'info');
+    activeMonitors.forEach(m => {
+      setCheckingMap(prev => ({ ...prev, [m.id]: true }));
+    });
+
+    try {
+      await Promise.allSettled(
+        activeMonitors.map(m => monitorService.triggerCheck(m.id, { wait: true }))
+      );
+      await refresh(true);
+      showToast(`Pulse completed across ${activeMonitors.length} targets.`, 'success');
+    } catch (err) {
+      await refresh(true);
+      showToast('Checks completed with some warnings.', 'warning');
+    } finally {
+      activeMonitors.forEach(m => {
+        setCheckingMap(prev => ({ ...prev, [m.id]: false }));
+      });
+    }
+  }, [monitors, refresh, showToast]);
 
   const toggleChangeReview = useCallback(async (targetId) => {
     const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -363,6 +422,7 @@ export function ObservatoryProvider({ children }) {
         togglePauseMonitor,
         deleteMonitor,
         triggerCheckMonitor,
+        triggerCheckAll,
         toggleChangeReview,
         showToast,
         dismissToast

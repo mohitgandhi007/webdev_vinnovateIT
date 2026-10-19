@@ -96,8 +96,10 @@ export const monitorsController = {
   async triggerCheck(req, res, next) {
     try {
       const workspaceId = req.headers['x-workspace-id'] || null;
-      const result = await monitorService.triggerCheck(req.params.id, workspaceId);
-      res.status(202).json({
+      const shouldWait = req.query.wait === 'true';
+      const result = await monitorService.triggerCheck(req.params.id, workspaceId, { wait: shouldWait });
+      const statusCode = shouldWait ? 200 : 202;
+      res.status(statusCode).json({
         success: true,
         data: result
       });

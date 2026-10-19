@@ -15,8 +15,10 @@ export default function MonitorsPage() {
     togglePauseMonitor,
     deleteMonitor,
     triggerCheckMonitor,
+    triggerCheckAll,
     checkingMap
   } = useObservatory();
+  const isCheckingAny = Object.values(checkingMap || {}).some(Boolean);
 
   // Filters, search, & sorting
   const [searchQuery, setSearchQuery] = useState('');
@@ -290,6 +292,20 @@ export default function MonitorsPage() {
         </div>
 
         <div className="flex items-center gap-space-sm shrink-0">
+          {monitors.length > 0 && (
+            <button
+              onClick={triggerCheckAll}
+              disabled={isCheckingAny}
+              className="inline-flex items-center gap-2 px-space-md py-2.5 rounded border border-sandstone bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-body-sm text-body-sm font-medium transition-all shadow-xs disabled:opacity-50"
+              type="button"
+              title="Immediately check all active targets for alterations"
+            >
+              <span className={`material-symbols-outlined text-[18px] ${isCheckingAny ? 'animate-spin text-primary' : 'text-primary'}`}>
+                refresh
+              </span>
+              <span>{isCheckingAny ? 'Checking...' : 'Pulse All'}</span>
+            </button>
+          )}
           <button
             onClick={() => setIsNotificationModalOpen(true)}
             className="inline-flex items-center gap-2 px-space-md py-2.5 rounded border border-sandstone bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm font-medium transition-all shadow-xs"

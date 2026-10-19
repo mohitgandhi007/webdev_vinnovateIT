@@ -173,7 +173,7 @@ export const monitorsApi = {
   create: (data) => apiClient.post('/monitors', data),
   update: (id, data) => apiClient.patch(`/monitors/${id}`, data),
   delete: (id) => apiClient.delete(`/monitors/${id}`),
-  triggerCheck: (id) => apiClient.post(`/monitors/${id}/check`),
+  triggerCheck: (id, options = {}) => apiClient.post(`/monitors/${id}/check${options.wait ? '?wait=true' : ''}`),
   getSnapshots: (id, params) => apiClient.get(`/monitors/${id}/snapshots`, { params }),
   getChanges: (id, params) => apiClient.get(`/monitors/${id}/changes`, { params }),
   compare: (id, params) => apiClient.get(`/monitors/${id}/compare`, { params }),

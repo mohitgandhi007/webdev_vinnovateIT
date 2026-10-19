@@ -191,7 +191,7 @@ export const monitorService = {
   /**
    * Trigger an on-demand check for a monitor
    */
-  async triggerCheck(id, workspaceId = null) {
+  async triggerCheck(id, workspaceId = null, { wait = false } = {}) {
     const monitor = await monitorRepository.findById(id);
     if (!monitor) {
       throw new MonitorServiceError('Monitor not found', 404);
@@ -208,12 +208,49 @@ export const monitorService = {
 
     // Prevent repeated clicks from creating unlimited simultaneous jobs
     if (monitor.is_checking) {
+      if (wait) {
+        // Wait for active execution to conclude, up to 25s
+        let waited = 0;
+        while (waited < 25000) {
+          await new Promise(r => setTimeout(r, 1000));
+          waited += 1000;
+          const fresh = await monitorRepository.findById(id);
+          if (!fresh || !fresh.is_checking) {
+            return {
+              message: fresh?.last_change_summary ? 'Change detected' : 'Check completed: No alterations detected',
+              monitor_id: id,
+              status: fresh?.status || 'healthy',
+              hasChanged: fresh?.status === 'degraded' || Boolean(fresh?.last_change_summary),
+              summary: fresh?.last_change_summary || 'No alterations detected',
+              completed_at: new Date().toISOString()
+            };
+          }
+        }
+      }
       return {
         message: 'Check is already running for this monitor',
         monitor_id: id,
         status: 'running',
         last_attempt_at: monitor.last_attempt_at
       };
+    }
+
+    if (wait) {
+      try {
+        const checkResult = await monitorRunner.runCheck(id, { isManual: true });
+        return {
+          message: checkResult.hasChanged ? 'Change detected' : 'Check completed: No alterations detected',
+          monitor_id: id,
+          status: checkResult.newStatus || 'healthy',
+          hasChanged: Boolean(checkResult.hasChanged),
+          isBaseline: Boolean(checkResult.isBaseline),
+          summary: checkResult.summary,
+          changeRecord: checkResult.changeRecord,
+          completed_at: new Date().toISOString()
+        };
+      } catch (err) {
+        throw new MonitorServiceError(`Check execution failed: ${err.message}`, 500);
+      }
     }
 
     // Mark monitor as checking

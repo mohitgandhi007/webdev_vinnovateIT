@@ -52,8 +52,8 @@ export const changeDetector = {
         visualChanged = true;
         // Simple heuristic diff percent based on node count and text diff lines
         const nodeDiff = Math.abs((currentSnapshot.dom_node_count || 0) - (previousSnapshot.dom_node_count || 0));
-        visualDiffPercent = Math.min(100, Number((nodeDiff * 0.5 + diffResult.totalDiffLines * 1.5).toFixed(1)));
-        if (visualDiffPercent === 0) visualDiffPercent = 5.0; // Minimal default visual diff percent
+        const estimatedDiff = Number((nodeDiff * 0.5 + diffResult.totalDiffLines * 1.5).toFixed(1));
+        visualDiffPercent = Math.min(100, Math.max(5.0, estimatedDiff));
       }
     }
 
